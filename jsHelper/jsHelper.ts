@@ -884,13 +884,20 @@ function tryGet(url: string, retries: number = 10, timeout: number = 1000): JQue
  * @param url
  * @param retries число попыток загрузки
  * @param timeout таймаут между попытками
- * @param notify вызывается перед каждым новым запросом. То есть число вызовов равно числу запросов. Каждый раз вызывается с урлом которые запрашивается.
+ * @param beforeGet вызывается перед каждым новым запросом. То есть число вызовов равно числу запросов. Каждый раз вызывается с урлом которые запрашивается.
  */
-async function tryGet_async(url: string, retries: number = 10, timeout: number = 1000, notify?: (url: string) => void): Promise<any> {
+async function tryGet_async(url: string, retries: number = 10, timeout: number = 1000, beforeGet?: IAction1<string>, onError?: IAction1<string>): Promise<any> {
     // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
     let $deffered = $.Deferred<string>();
-    if (notify)
-        notify(url);
+
+    if (beforeGet) {
+        try {
+            beforeGet(url);
+        }
+        catch (err) {
+            logDebug("beforeGet вызвал исключение", err);
+        }
+    }
 
     $.ajax({
         url: url,
@@ -899,6 +906,16 @@ async function tryGet_async(url: string, retries: number = 10, timeout: number =
         success: (data, status, jqXHR) => $deffered.resolve(data),
 
         error: function (this: JQueryAjaxSettings, jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
+
+            if (onError) {
+                try {
+                    onError(url);
+                }
+                catch (err) {
+                    logDebug("onError вызвал исключение", err);
+                }
+            }
+
             retries--;
             if (retries <= 0) {
                 let err = new Error(`can't get ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
@@ -909,8 +926,14 @@ async function tryGet_async(url: string, retries: number = 10, timeout: number =
             //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
             let _this = this;
             setTimeout(() => {
-                if (notify)
-                    notify(url);     // уведомляем об очередном запросе
+                if (beforeGet) {
+                    try {
+                        beforeGet(url);
+                    }
+                    catch (err) {
+                        logDebug("beforeGet вызвал исключение", err);
+                    }
+                }
 
                 $.ajax(_this);
             }, timeout);
@@ -926,14 +949,22 @@ async function tryGet_async(url: string, retries: number = 10, timeout: number =
  * @param form данные для отправки на сервер
  * @param retries
  * @param timeout
- * @param notify
+ * @param beforePost
  */
-async function tryPost_async(url: string, form:string, retries: number = 10, timeout: number = 1000, notify?: (url: string) => void): Promise<any>{
+async function tryPost_async(url: string, form: string, retries: number = 10, timeout: number = 1000, beforePost?: IAction1<string>, onError?: IAction1<string>): Promise <any> {
 
     // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
     let $deferred = $.Deferred<string>();
-    if (notify)
-        notify(url);
+
+    if (beforePost) {
+        try {
+            beforePost(url);
+        }
+        catch (err) {
+            logDebug("beforePost вызвал исключение", err);
+        }
+    }
+
 
     $.ajax({
         url: url,
@@ -943,6 +974,16 @@ async function tryPost_async(url: string, form:string, retries: number = 10, tim
         success: (data, status, jqXHR) => $deferred.resolve(data),
 
         error: function (this: JQueryAjaxSettings, jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
+
+            if (onError) {
+                try {
+                    onError(url);
+                }
+                catch (err) {
+                    logDebug("onError вызвал исключение", err);
+                }
+            }
+
             retries--;
             if (retries <= 0) {
                 let err = new Error(`can't post ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
@@ -953,8 +994,14 @@ async function tryPost_async(url: string, form:string, retries: number = 10, tim
             //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
             let _this = this;
             setTimeout(() => {
-                if (notify)
-                    notify(url);     // уведомляем об очередном запросе
+                if (beforePost) {
+                    try {
+                        beforePost(url);
+                    }
+                    catch (err) {
+                        logDebug("beforePost вызвал исключение", err);
+                    }
+                }
 
                 $.ajax(_this);
             }, timeout);
