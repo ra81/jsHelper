@@ -281,6 +281,7 @@ function numberfy(str: string): number {
 /**
  * Пробуем оцифровать данные но если они выходят как Number.POSITIVE_INFINITY или <= minVal, валит ошибку.
    смысл в быстром вываливании ошибки если парсинг текста должен дать число
+   Нужно понимать что если оцифровка не удалась, то получится -1 и при minVal=0 выдаст ошибку конечно
  * @param value строка являющая собой число больше minVal
  * @param minVal ограничение снизу. Число.
  * @param infinity разрешена ли бесконечность
@@ -340,12 +341,12 @@ function extractFloatPositive(str: string): number[]|null {
     if (m == null)
         return null;
 
-    let n = m.map((i, e) => numberfyOrError($(e).text(), -1));
+    let n = m.map((val, i, arr) => numberfyOrError(val, -1));
     return n;
 }
 
 /**
- * из указанной строки которая должна быть ссылкой, извлекает числа. обычно это id юнита товара и так далее
+ * из указанной строки, извлекает числа. обычно это id юнита товара и так далее
  * @param str
  */
 function extractIntPositive(str: string): number[] | null {
@@ -510,6 +511,23 @@ function getUnitType($html: JQuery): UnitTypes | null {
 
     return type;
 }
+
+/**
+ * Форматирует строки в соответствии с форматом в C#. Плейсхолдеры {0}, {1} заменяет на аргументы.
+   если аргумента НЕТ а плейсхолдер есть, вывалит исключение, как и в сишарпе.
+ * @param str шаблон строки
+ * @param args аргументы которые подставить
+ */
+function formatStr(str: string, ...args: any[]): string {
+    let res = str.replace(/{(\d+)}/g, (match, number) => {
+        if (args[number] == null)
+            throw new Error(`плейсхолдер ${number} не имеет значения`);
+
+        return args[number];
+    });
+    return res;
+}
+
 
 // РЕГУЛЯРКИ ДЛЯ ССЫЛОК ------------------------------------
 
