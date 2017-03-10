@@ -204,6 +204,63 @@ function intersect<T>(a: T[], b: T[]): T[] {
 }
 
 
+// NUMBER ------------------------------------------
+
+/**
+ * round до заданного числа знаков. Может дать погрешность на округлении но похрен
+ * @param n
+ * @param decimals
+ */
+function roundTo(n: number, decimals: number) {
+    if (isNaN(n) || isNaN(decimals))
+        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+
+    if (decimals < 0)
+        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+
+    decimals = Math.round(decimals);    // делаем ставку на косяки округления откуда может прилететь 1.00000001
+    let f = Math.pow(10, decimals);
+    return Math.round(n * f) / f;
+}
+
+/**
+ * floor до заданного числа знаков. Может дать погрешность если будет число вида x.99999999999
+   так как при расчетах прибавляет 1е-10. Но это очень редкий случай когда округлит вверх
+ * @param n
+ * @param decimals
+ */
+function floorTo(n: number, decimals: number) {
+    if (isNaN(n) || isNaN(decimals))
+        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+
+    if (decimals < 0)
+        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+
+    decimals = Math.round(decimals);    // делаем ставку на косяки округления откуда может прилететь 1.00000001
+    let f = Math.pow(10, decimals);
+    return Math.floor(n * f + 1e-10) / f;
+}
+
+/**
+ * ceil до заданного числа знаков. Может дать погрешность если будет число вида x.00000000000001
+   так как при расчетах вычитает 1е-10. Но это очень редкий случай когда округлит вверх
+ * @param n
+ * @param decimals
+ */
+function ceilTo(n: number, decimals: number) {
+    if (isNaN(n) || isNaN(decimals))
+        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+
+    if (decimals < 0)
+        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+
+    decimals = Math.round(decimals);    // делаем ставку на косяки округления откуда может прилететь 1.00000001
+    let f = Math.pow(10, decimals);
+    return Math.ceil(n * f - 1e-10) / f;
+}
+
+
+
 // -------------------------------------------------
 
 interface IAction0 {
@@ -477,7 +534,7 @@ function sayNumber(num: number): string {
  * @param num
  * @param symbol
  */
-function sayMoney(num: number, symbol?:string) {
+function sayMoney(num: number, symbol:string="$") {
     let result = sayNumber(num);
     if (symbol != null) {
         if (num < 0) result = '-' + symbol + sayNumber(Math.abs(num));
@@ -540,6 +597,7 @@ let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i;    
 let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?$/i; // история продаж в магазине по товару
 let url_supp_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
 let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale/i;        // продажа склад/завод
+let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
 
 let url_supply_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
 let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i;   // заказ оборудования на завод, лабу или куда то еще
@@ -557,6 +615,7 @@ let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee
 // 
 let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
 let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i;   // страница со всеми товарами игры
+let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
 
 /**
  * По заданной ссылке и хтмл определяет находимся ли мы внутри юнита или нет.
@@ -969,7 +1028,7 @@ async function tryGet_async(url: string, retries: number = 10, timeout: number =
  * @param timeout
  * @param beforePost
  */
-async function tryPost_async(url: string, form: string, retries: number = 10, timeout: number = 1000, beforePost?: IAction1<string>, onError?: IAction1<string>): Promise <any> {
+async function tryPost_async(url: string, form: any, retries: number = 10, timeout: number = 1000, beforePost?: IAction1<string>, onError?: IAction1<string>): Promise <any> {
 
     // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
     let $deferred = $.Deferred<string>();
@@ -1029,6 +1088,76 @@ async function tryPost_async(url: string, form: string, retries: number = 10, ti
     return $deferred.promise();
 }
 
+/**
+ * Отправляет данные на сервер запросом POST. В остальном работает как и гет. Так же вернет промис который ресолвит с возвращенными данными
+ * @param url
+ * @param data данные для отправки на сервер
+ * @param retries
+ * @param timeout
+ * @param beforePost
+ */
+async function tryPostJSON_async(url: string, data: any, retries: number = 10, timeout: number = 1000, beforePost?: IAction1<string>, onError?: IAction1<string>): Promise<any> {
+
+    // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
+    let $deferred = $.Deferred<string>();
+
+    if (beforePost) {
+        try {
+            beforePost(url);
+        }
+        catch (err) {
+            logDebug("beforePost вызвал исключение", err);
+        }
+    }
+
+
+    $.ajax({
+        url: url,
+        data: data,
+        type: "POST",
+        dataType: 'JSON',
+
+        success: (data, status, jqXHR) => $deferred.resolve(data),
+
+        error: function (this: JQueryAjaxSettings, jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
+
+            if (onError) {
+                try {
+                    onError(url);
+                }
+                catch (err) {
+                    logDebug("onError вызвал исключение", err);
+                }
+            }
+
+            retries--;
+            if (retries <= 0) {
+                let err = new Error(`can't post ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
+                $deferred.reject(err);
+                return;
+            }
+
+            //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+            let _this = this;
+            setTimeout(() => {
+                if (beforePost) {
+                    try {
+                        beforePost(url);
+                    }
+                    catch (err) {
+                        logDebug("beforePost вызвал исключение", err);
+                    }
+                }
+
+                $.ajax(_this);
+            }, timeout);
+        }
+    });
+
+    return $deferred.promise();
+}
+
+
 
 // COMMON ----------------------------------------
 
@@ -1038,10 +1167,7 @@ function logDebug(msg: string, ...args: any[]) {
     if (!$xioDebug)
         return;
 
-    if (args.length === 0)
-        console.log(msg);
-    else
-        console.log(msg, args);
+    console.log(msg, ...args);
 }
 
 /**
