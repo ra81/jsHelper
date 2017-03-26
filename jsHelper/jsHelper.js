@@ -1,38 +1,92 @@
 // 
 // Набор вспомогательных функций для использования в других проектах. Универсальные
 //   /// <reference path= "../../_jsHelper/jsHelper/jsHelper.ts" />
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 // список типов юнитов. берется по картинке в юните, или с класса i-farm, i-office в списках юнитов
 var UnitTypes;
 (function (UnitTypes) {
     UnitTypes[UnitTypes["unknown"] = 0] = "unknown";
-    UnitTypes[UnitTypes["office"] = 1] = "office";
-    UnitTypes[UnitTypes["shop"] = 2] = "shop";
-    UnitTypes[UnitTypes["warehouse"] = 3] = "warehouse";
-    UnitTypes[UnitTypes["workshop"] = 4] = "workshop";
-    UnitTypes[UnitTypes["farm"] = 5] = "farm";
-    UnitTypes[UnitTypes["lab"] = 6] = "lab"; // лаборатория
+    UnitTypes[UnitTypes["animalfarm"] = 1] = "animalfarm";
+    UnitTypes[UnitTypes["farm"] = 2] = "farm";
+    UnitTypes[UnitTypes["lab"] = 3] = "lab";
+    UnitTypes[UnitTypes["mill"] = 4] = "mill";
+    UnitTypes[UnitTypes["mine"] = 5] = "mine";
+    UnitTypes[UnitTypes["office"] = 6] = "office";
+    UnitTypes[UnitTypes["oilpump"] = 7] = "oilpump";
+    UnitTypes[UnitTypes["orchard"] = 8] = "orchard";
+    UnitTypes[UnitTypes["sawmill"] = 9] = "sawmill";
+    UnitTypes[UnitTypes["shop"] = 10] = "shop";
+    UnitTypes[UnitTypes["seaport"] = 11] = "seaport";
+    UnitTypes[UnitTypes["warehouse"] = 12] = "warehouse";
+    UnitTypes[UnitTypes["workshop"] = 13] = "workshop";
+    UnitTypes[UnitTypes["villa"] = 14] = "villa";
+    UnitTypes[UnitTypes["fishingbase"] = 15] = "fishingbase";
+    UnitTypes[UnitTypes["service_light"] = 16] = "service_light";
+    UnitTypes[UnitTypes["fitness"] = 17] = "fitness";
+    UnitTypes[UnitTypes["medicine"] = 18] = "medicine";
+    UnitTypes[UnitTypes["restaurant"] = 19] = "restaurant";
+    UnitTypes[UnitTypes["laundry"] = 20] = "laundry";
+    UnitTypes[UnitTypes["hairdressing"] = 21] = "hairdressing";
+    UnitTypes[UnitTypes["power"] = 22] = "power";
+    UnitTypes[UnitTypes["coal_power"] = 23] = "coal_power";
+    UnitTypes[UnitTypes["incinerator_power"] = 24] = "incinerator_power";
+    UnitTypes[UnitTypes["oil_power"] = 25] = "oil_power";
+    UnitTypes[UnitTypes["fuel"] = 26] = "fuel";
+    UnitTypes[UnitTypes["repair"] = 27] = "repair";
+    UnitTypes[UnitTypes["apiary"] = 28] = "apiary";
+    UnitTypes[UnitTypes["educational"] = 29] = "educational";
+    UnitTypes[UnitTypes["kindergarten"] = 30] = "kindergarten";
+    UnitTypes[UnitTypes["sun_power"] = 31] = "sun_power";
+    UnitTypes[UnitTypes["network"] = 32] = "network";
+    UnitTypes[UnitTypes["it"] = 33] = "it";
+    UnitTypes[UnitTypes["cellular"] = 34] = "cellular";
 })(UnitTypes || (UnitTypes = {}));
+// уровни сервиса
+var ServiceLevels;
+(function (ServiceLevels) {
+    ServiceLevels[ServiceLevels["none"] = -1] = "none";
+    ServiceLevels[ServiceLevels["lower"] = 0] = "lower";
+    ServiceLevels[ServiceLevels["low"] = 1] = "low";
+    ServiceLevels[ServiceLevels["normal"] = 2] = "normal";
+    ServiceLevels[ServiceLevels["high"] = 3] = "high";
+    ServiceLevels[ServiceLevels["higher"] = 4] = "higher";
+    ServiceLevels[ServiceLevels["elite"] = 5] = "elite";
+})(ServiceLevels || (ServiceLevels = {}));
+/**
+ * Простенький конвертер, который из множества формирует массив значений множества. По факту массив чисел.
+   используется внутреннее представление множеств и как бы может сломаться в будущем
+ * @param enumType тип множества
+ */
+function enum2Arr(enumType) {
+    let res = [];
+    for (let key in enumType) {
+        if (typeof enumType[key] === "number")
+            res.push(enumType[key]);
+    }
+    return res;
+}
 /**
  * Простой счетчик. Увеличивается на 1 при каждом вызове метода Next. Нужен для подсчета числа запросов
  */
-var Counter = (function () {
-    function Counter() {
-        var _this = this;
-        this.Next = function () {
-            _this._count++;
+class Counter {
+    constructor() {
+        this.Next = () => {
+            this._count++;
         };
         this._count = 0;
     }
     ;
-    Object.defineProperty(Counter.prototype, "Count", {
-        get: function () {
-            return this._count;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Counter;
-}());
+    get Count() {
+        return this._count;
+    }
+}
 /**
  * Проверяет наличие в словаре ключей. Шорт алиас для удобства.
  * Если словарь не задать, вывалит исключение
@@ -50,10 +104,25 @@ function isEmpty(dict) {
 function dict2String(dict) {
     if (isEmpty(dict))
         return "";
-    var newItems = [];
-    for (var key in dict)
+    let newItems = [];
+    for (let key in dict)
         newItems.push(key + ":" + dict[key].toString());
     return newItems.join(", ");
+}
+/**
+ * Фильтрует заданный словарь. Выбирает из него только те элементы которые проходят фильтр.
+ * В любом раскладе возвращает пустой словарь
+ * @param dict
+ * @param selector
+ */
+function filterDictVal(dict, selector) {
+    let res = {};
+    for (let key in dict) {
+        let item = dict[key];
+        if (selector(item))
+            res[key] = item;
+    }
+    return res;
 }
 /**
  * Проверяет что элемент есть в массиве.
@@ -61,6 +130,8 @@ function dict2String(dict) {
  * @param arr массив НЕ null
  */
 function isOneOf(item, arr) {
+    if (arr.length <= 0)
+        return false;
     return arr.indexOf(item) >= 0;
 }
 /**
@@ -69,14 +140,13 @@ function isOneOf(item, arr) {
  * @param keySelector
  */
 function toDictionaryN(arr, keySelector) {
-    var res = {};
+    let res = {};
     if (!arr)
         throw new Error("arr null");
     if (!keySelector)
         throw new Error("keySelector null");
-    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
-        var el = arr_1[_i];
-        var k = keySelector(el);
+    for (let el of arr) {
+        let k = keySelector(el);
         if (!k)
             throw new Error("Ключ не может быть неопределен!");
         if (res[k])
@@ -84,6 +154,86 @@ function toDictionaryN(arr, keySelector) {
         res[k] = el;
     }
     return res;
+}
+/**
+ * Возвращает только уникальные значения массива. Для объектов идет сравнение ссылок, само содержимое не сравнивается
+ * @param array
+ */
+function unique(array) {
+    let res = [];
+    for (let i = 0; i < array.length; i++) {
+        let item = array[i];
+        if (array.indexOf(item) === i)
+            res.push(item);
+    }
+    return res;
+}
+/**
+ * Находит пересечение двух массивов. Объекты сравнивать будет по ссылкам. Дубли удаляются.
+ * Возвращает массив уникальных значений имеющихся в обоих массивах
+ * @param a
+ * @param b
+ */
+function intersect(a, b) {
+    // чтобы быстрее бегал indexOf в A кладем более длинный массив
+    if (b.length > a.length) {
+        let t = b;
+        b = a;
+        a = t;
+    }
+    // находим пересечение с дублями
+    let intersect = [];
+    for (let item of a) {
+        if (b.indexOf(item) >= 0)
+            intersect.push(item);
+    }
+    // если надо удалить дубли, удаляем
+    return unique(intersect);
+}
+// NUMBER ------------------------------------------
+/**
+ * round до заданного числа знаков. Может дать погрешность на округлении но похрен
+ * @param n
+ * @param decimals
+ */
+function roundTo(n, decimals) {
+    if (isNaN(n) || isNaN(decimals))
+        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+    if (decimals < 0)
+        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+    decimals = Math.round(decimals); // делаем ставку на косяки округления откуда может прилететь 1.00000001
+    let f = Math.pow(10, decimals);
+    return Math.round(n * f) / f;
+}
+/**
+ * floor до заданного числа знаков. Может дать погрешность если будет число вида x.99999999999
+   так как при расчетах прибавляет 1е-10. Но это очень редкий случай когда округлит вверх
+ * @param n
+ * @param decimals
+ */
+function floorTo(n, decimals) {
+    if (isNaN(n) || isNaN(decimals))
+        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+    if (decimals < 0)
+        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+    decimals = Math.round(decimals); // делаем ставку на косяки округления откуда может прилететь 1.00000001
+    let f = Math.pow(10, decimals);
+    return Math.floor(n * f + 1e-10) / f;
+}
+/**
+ * ceil до заданного числа знаков. Может дать погрешность если будет число вида x.00000000000001
+   так как при расчетах вычитает 1е-10. Но это очень редкий случай когда округлит вверх
+ * @param n
+ * @param decimals
+ */
+function ceilTo(n, decimals) {
+    if (isNaN(n) || isNaN(decimals))
+        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+    if (decimals < 0)
+        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+    decimals = Math.round(decimals); // делаем ставку на косяки округления откуда может прилететь 1.00000001
+    let f = Math.pow(10, decimals);
+    return Math.ceil(n * f - 1e-10) / f;
 }
 // PARSE -------------------------------------------
 /**
@@ -99,14 +249,14 @@ function cleanStr(str) {
 function getRealm() {
     // https://*virtonomic*.*/*/main/globalreport/marketing/by_trade_at_cities/*
     // https://*virtonomic*.*/*/window/globalreport/marketing/by_trade_at_cities/*
-    var rx = new RegExp(/https:\/\/virtonomic[A-Za-z]+\.[a-zA-Z]+\/([a-zA-Z]+)\/.+/ig);
-    var m = rx.exec(document.location.href);
+    let rx = new RegExp(/https:\/\/virtonomic[A-Za-z]+\.[a-zA-Z]+\/([a-zA-Z]+)\/.+/ig);
+    let m = rx.exec(document.location.href);
     if (m == null)
         return null;
     return m[1];
 }
 function getRealmOrError() {
-    var realm = getRealm();
+    let realm = getRealm();
     if (realm === null)
         throw new Error("Не смог определить реалм по ссылке " + document.location.href);
     return realm;
@@ -115,11 +265,11 @@ function getRealmOrError() {
  * Парсит id компании со страницы и выдает ошибку если не может спарсить
  */
 function getCompanyId() {
-    var str = matchedOrError($("a.dashboard").attr("href"), /\d+/);
+    let str = matchedOrError($("a.dashboard").attr("href"), /\d+/);
     return numberfyOrError(str);
 }
 /**
- * Оцифровывает строку. Возвращает всегда либо число или Number.POSITIVE_INFINITY либо -1 если отпарсить не вышло.
+ * Оцифровывает строку. Возвращает всегда либо число или Number.POSITIVE_INFINITY либо -1 если str не содержит числа.
  * @param variable любая строка.
  */
 function numberfy(str) {
@@ -136,21 +286,20 @@ function numberfy(str) {
     else {
         // если str будет undef null или что то страшное, то String() превратит в строку после чего парсинг даст NaN
         // не будет эксепшнов
-        var n = parseFloat(cleanStr(String(str)));
+        let n = parseFloat(cleanStr(String(str)));
         return isNaN(n) ? -1 : n;
     }
 }
 /**
  * Пробуем оцифровать данные но если они выходят как Number.POSITIVE_INFINITY или <= minVal, валит ошибку.
    смысл в быстром вываливании ошибки если парсинг текста должен дать число
+   Нужно понимать что если оцифровка не удалась, то получится -1 и при minVal=0 выдаст ошибку конечно
  * @param value строка являющая собой число больше minVal
  * @param minVal ограничение снизу. Число.
  * @param infinity разрешена ли бесконечность
  */
-function numberfyOrError(str, minVal, infinity) {
-    if (minVal === void 0) { minVal = 0; }
-    if (infinity === void 0) { infinity = false; }
-    var n = numberfy(str);
+function numberfyOrError(str, minVal = 0, infinity = false) {
+    let n = numberfy(str);
     if (!infinity && (n === Number.POSITIVE_INFINITY || n === Number.NEGATIVE_INFINITY))
         throw new RangeError("Получили бесконечность, что запрещено.");
     if (n <= minVal)
@@ -164,11 +313,11 @@ function numberfyOrError(str, minVal, infinity) {
  * @param rx паттерн который ищем
  */
 function matchedOrError(str, rx, errMsg) {
-    var m = str.match(rx);
+    let m = str.match(rx);
     if (m == null)
-        throw new Error(errMsg || "\u041F\u0430\u0442\u0442\u0435\u0440\u043D " + rx + " \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 " + str);
+        throw new Error(errMsg || `Паттерн ${rx} не найден в ${str}`);
     if (m.length > 1)
-        throw new Error(errMsg || "\u041F\u0430\u0442\u0442\u0435\u0440\u043D " + rx + " \u043D\u0430\u0439\u0434\u0435\u043D \u0432 " + str + " " + m.length + " \u0440\u0430\u0437 \u0432\u043C\u0435\u0441\u0442\u043E \u043E\u0436\u0438\u0434\u0430\u0435\u043C\u043E\u0433\u043E 1");
+        throw new Error(errMsg || `Паттерн ${rx} найден в ${str} ${m.length} раз вместо ожидаемого 1`);
     return m[0];
 }
 /**
@@ -179,9 +328,9 @@ function matchedOrError(str, rx, errMsg) {
  * @param errMsg
  */
 function execOrError(str, rx, errMsg) {
-    var m = rx.exec(str);
+    let m = rx.exec(str);
     if (m == null)
-        throw new Error(errMsg || "\u041F\u0430\u0442\u0442\u0435\u0440\u043D " + rx + " \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 " + str);
+        throw new Error(errMsg || `Паттерн ${rx} не найден в ${str}`);
     return m;
 }
 /**
@@ -191,21 +340,21 @@ function execOrError(str, rx, errMsg) {
  * @param str
  */
 function extractFloatPositive(str) {
-    var m = cleanStr(str).match(/\d+\.\d+/ig);
+    let m = cleanStr(str).match(/\d+\.\d+/ig);
     if (m == null)
         return null;
-    var n = m.map(function (i, e) { return numberfyOrError($(e).text(), -1); });
+    let n = m.map((val, i, arr) => numberfyOrError(val, -1));
     return n;
 }
 /**
- * из указанной строки которая должна быть ссылкой, извлекает числа. обычно это id юнита товара и так далее
+ * из указанной строки, извлекает числа. обычно это id юнита товара и так далее
  * @param str
  */
 function extractIntPositive(str) {
-    var m = cleanStr(str).match(/\d+/ig);
+    let m = cleanStr(str).match(/\d+/ig);
     if (m == null)
         return null;
-    var n = m.map(function (val, i, arr) { return numberfyOrError(val, -1); });
+    let n = m.map((val, i, arr) => numberfyOrError(val, -1));
     return n;
 }
 /**
@@ -213,8 +362,8 @@ function extractIntPositive(str) {
  * @param str очищенная от пробелов и лишних символов строка
  */
 function monthFromStr(str) {
-    var mnth = ["янв", "февр", "мар", "апр", "май", "июн", "июл", "авг", "сент", "окт", "нояб", "дек"];
-    for (var i = 0; i < mnth.length; i++) {
+    let mnth = ["январ", "феврал", "март", "апрел", "ма", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр"];
+    for (let i = 0; i < mnth.length; i++) {
         if (str.indexOf(mnth[i]) === 0)
             return i;
     }
@@ -226,15 +375,15 @@ function monthFromStr(str) {
  * @param str
  */
 function extractDate(str) {
-    var dateRx = /^(\d{1,2})\s+([а-я]+)\s+(\d{1,4})/i;
-    var m = dateRx.exec(str);
+    let dateRx = /^(\d{1,2})\s+([а-я]+)\s+(\d{1,4})/i;
+    let m = dateRx.exec(str);
     if (m == null)
         return null;
-    var d = parseInt(m[1]);
-    var mon = monthFromStr(m[2]);
+    let d = parseInt(m[1]);
+    let mon = monthFromStr(m[2]);
     if (mon == null)
         return null;
-    var y = parseInt(m[3]);
+    let y = parseInt(m[3]);
     return new Date(y, mon, d);
 }
 /**
@@ -242,26 +391,26 @@ function extractDate(str) {
  * @param date
  */
 function dateToShort(date) {
-    var d = date.getDate();
-    var m = date.getMonth() + 1;
-    var yyyy = date.getFullYear();
-    var dStr = d < 10 ? "0" + d : d.toString();
-    var mStr = m < 10 ? "0" + m : m.toString();
-    return dStr + "." + mStr + "." + yyyy;
+    let d = date.getDate();
+    let m = date.getMonth() + 1;
+    let yyyy = date.getFullYear();
+    let dStr = d < 10 ? "0" + d : d.toString();
+    let mStr = m < 10 ? "0" + m : m.toString();
+    return `${dStr}.${mStr}.${yyyy}`;
 }
 /**
  * из строки вида 01.12.2017 формирует дату
  * @param str
  */
 function dateFromShort(str) {
-    var items = str.split(".");
-    var d = parseInt(items[0]);
+    let items = str.split(".");
+    let d = parseInt(items[0]);
     if (d <= 0)
         throw new Error("дата неправильная.");
-    var m = parseInt(items[1]) - 1;
+    let m = parseInt(items[1]) - 1;
     if (m < 0)
         throw new Error("месяц неправильная.");
-    var y = parseInt(items[2]);
+    let y = parseInt(items[2]);
     if (y < 0)
         throw new Error("год неправильная.");
     return new Date(y, m, d);
@@ -277,10 +426,10 @@ function sayNumber(num) {
         num = Math.round(num * 100) / 100;
     else
         num = Math.round(num);
-    var s = num.toString();
-    var s1 = "";
-    var l = s.length;
-    var p = s.indexOf(".");
+    let s = num.toString();
+    let s1 = "";
+    let l = s.length;
+    let p = s.indexOf(".");
     if (p > -1) {
         s1 = s.substr(p);
         l = p;
@@ -306,12 +455,13 @@ function sayNumber(num) {
     return s1;
 }
 /**
- * Для денег подставляет нужный символ при выводе на экран
+ * Для денег подставляет нужный символ при выводе на экран. Округляет до 2 знаков,
+   так же вставляет пробелы как разделитель для тысяч
  * @param num
  * @param symbol
  */
-function sayMoney(num, symbol) {
-    var result = sayNumber(num);
+function sayMoney(num, symbol = "$") {
+    let result = sayNumber(num);
     if (symbol != null) {
         if (num < 0)
             result = '-' + symbol + sayNumber(Math.abs(num));
@@ -328,41 +478,59 @@ function sayMoney(num, symbol) {
  * @param $html
  */
 function getUnitType($html) {
-    var $div = $html.find("#unitImage");
+    let $div = $html.find("#unitImage");
     if ($div.length === 0)
         return null;
-    var src = $div.find("img").attr("src");
-    var items = src.split("/");
+    let src = $div.find("img").attr("src");
+    let items = src.split("/");
     if (items.length < 2)
         throw new Error("Что то не так с урлом картинки " + src);
-    var typeStr = items[items.length - 1].split("_")[0];
-    var type = UnitTypes[typeStr] ? UnitTypes[typeStr] : UnitTypes.unknown;
+    let typeStr = items[items.length - 1].split("_")[0];
+    let type = UnitTypes[typeStr] ? UnitTypes[typeStr] : UnitTypes.unknown;
     if (type == UnitTypes.unknown)
         throw new Error("Не описан тип юнита " + typeStr);
     return type;
 }
+/**
+ * Форматирует строки в соответствии с форматом в C#. Плейсхолдеры {0}, {1} заменяет на аргументы.
+   если аргумента НЕТ а плейсхолдер есть, вывалит исключение, как и в сишарпе.
+ * @param str шаблон строки
+ * @param args аргументы которые подставить
+ */
+function formatStr(str, ...args) {
+    let res = str.replace(/{(\d+)}/g, (match, number) => {
+        if (args[number] == null)
+            throw new Error(`плейсхолдер ${number} не имеет значения`);
+        return args[number];
+    });
+    return res;
+}
 // РЕГУЛЯРКИ ДЛЯ ССЫЛОК ------------------------------------
 // для 1 юнита
 // 
-var url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i; // внутри юнита. любая страница
-var url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i; // главная юнита
-var url_unit_finance_report = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
-var url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i; // торговый зал
-var url_supp_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i; // снабжение
-var url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale/i; // продажа склад/завод
-var url_supply_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i; // заказ товара в маг, или склад. в общем стандартный заказ товара
-var url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i; // заказ оборудования на завод, лабу или куда то еще
+let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i; // внутри юнита. любая страница
+let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i; // главная юнита
+let url_unit_finance_report = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
+let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i; // торговый зал
+let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
+let url_supp_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i; // снабжение
+let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale/i; // продажа склад/завод
+let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i; // реклама
+let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
+let url_supply_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i; // заказ товара в маг, или склад. в общем стандартный заказ товара
+let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i; // заказ оборудования на завод, лабу или куда то еще
 // для компании
 // 
-var url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i; // список юнитов. Работает и для списка юнитов чужой компании
-var url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i; // отчет по подразделениями из отчетов
-var url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i; // отчет по рекламным акциям
-var url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i; // в окне управления юнитами групповой ремонт или закупка оборудования
-var url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i; // управление - персонал
+let url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i; // список юнитов. Работает и для списка юнитов чужой компании
+let url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i; // отчет по подразделениями из отчетов
+let url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i; // отчет по рекламным акциям
+let url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i; // в окне управления юнитами групповой ремонт или закупка оборудования
+let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i; // управление - персонал
 // для для виртономики
 // 
-var url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
-var url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i; // страница со всеми товарами игры
+let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
+let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i; // страница со всеми товарами игры
+let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
 /**
  * По заданной ссылке и хтмл определяет находимся ли мы внутри юнита или нет.
  * Если на задавать ссылку и хтмл то берет текущий документ.
@@ -371,23 +539,22 @@ var url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i
  * @param $html
  * @param my своя компания или нет?
  */
-function isUnit(urlPath, $html, my) {
-    if (my === void 0) { my = true; }
+function isUnit(urlPath, $html, my = true) {
     if (!urlPath || !$html) {
         urlPath = document.location.pathname;
         $html = $(document);
     }
     // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
     // https://virtonomica.ru/olga/main/unit/view/6452212/*
-    var urlOk = url_unit_rx.test(urlPath);
+    let urlOk = url_unit_rx.test(urlPath);
     if (!urlOk)
         return false;
     // но у своего юнита ссыль на офис имеет тот же айди что и ссыль на дашборду. А для чужого нет
-    var urlOffice = $html.find("div.officePlace a").attr("href");
-    var urlDash = $html.find("a.dashboard").attr("href");
+    let urlOffice = $html.find("div.officePlace a").attr("href");
+    let urlDash = $html.find("a.dashboard").attr("href");
     if (urlOffice.length === 0 || urlDash.length === 0)
         throw new Error("Ссылка на офис или дашборду не может быть найдена");
-    var isMy = (urlOffice + "/dashboard" === urlDash);
+    let isMy = (`${urlOffice}/dashboard` === urlDash);
     return my ? isMy : !isMy;
 }
 /**
@@ -400,8 +567,8 @@ function isMyUnitList() {
         return false;
     // запрос id может вернуть ошибку если мы на window ссылке. значит точно у чужого васи
     try {
-        var id = getCompanyId();
-        var urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
+        let id = getCompanyId();
+        let urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
         if (urlId[0] != id)
             return false;
     }
@@ -420,8 +587,8 @@ function isOthersUnitList() {
         return false;
     try {
         // для чужого списка будет разный айди в дашборде и в ссылке
-        var id = getCompanyId();
-        var urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
+        let id = getCompanyId();
+        let urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
         if (urlId[0] === id)
             return false;
     }
@@ -431,12 +598,11 @@ function isOthersUnitList() {
     }
     return true;
 }
-function isUnitMain(urlPath, html, my) {
-    if (my === void 0) { my = true; }
-    var ok = url_unit_main_rx.test(urlPath);
+function isUnitMain(urlPath, html, my = true) {
+    let ok = url_unit_main_rx.test(urlPath);
     if (!ok)
         return false;
-    var hasTabs = $(html).find("ul.tabu").length > 0;
+    let hasTabs = $(html).find("ul.tabu").length > 0;
     if (my)
         return hasTabs;
     else
@@ -460,13 +626,12 @@ function isCompanyRepByUnit() {
  * @param html полностью страница
  * @param my свой юнит или чужой
  */
-function isShop(html, my) {
-    if (my === void 0) { my = true; }
-    var $html = $(html);
+function isShop(html, my = true) {
+    let $html = $(html);
     // нет разницы наш или чужой юнит везде картинка мага нужна. ее нет только если window
-    var $img = $html.find("#unitImage img[src*='/shop_']");
+    let $img = $html.find("#unitImage img[src*='/shop_']");
     if ($img.length > 1)
-        throw new Error("\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E (" + $img.length + ") \u043A\u0430\u0440\u0442\u0438\u043D\u043E\u043A \u041C\u0430\u0433\u0430\u0437\u0438\u043D\u0430.");
+        throw new Error(`Найдено несколько (${$img.length}) картинок Магазина.`);
     return $img.length > 0;
 }
 /**
@@ -474,20 +639,18 @@ function isShop(html, my) {
  * @param html полностью страница
  * @param my свой юнит или чужой
  */
-function isFuel(html, my) {
-    if (my === void 0) { my = true; }
-    var $html = $(html);
+function isFuel(html, my = true) {
+    let $html = $(html);
     // нет разницы наш или чужой юнит везде картинка мага нужна
-    var $img = $html.find("#unitImage img[src*='/fuel_']");
+    let $img = $html.find("#unitImage img[src*='/fuel_']");
     if ($img.length > 1)
-        throw new Error("\u041D\u0430\u0439\u0434\u0435\u043D\u043E \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E (" + $img.length + ") \u043A\u0430\u0440\u0442\u0438\u043D\u043E\u043A \u041C\u0430\u0433\u0430\u0437\u0438\u043D\u0430.");
+        throw new Error(`Найдено несколько (${$img.length}) картинок Магазина.`);
     return $img.length > 0;
 }
-function hasTradeHall(html, my) {
-    if (my === void 0) { my = true; }
-    var $html = $(html);
+function hasTradeHall(html, my = true) {
+    let $html = $(html);
     if (my) {
-        var $a = $html.find("ul.tabu a[href$=trading_hall]");
+        let $a = $html.find("ul.tabu a[href$=trading_hall]");
         if ($a.length > 1)
             throw new Error("Найдено больше одной ссылки на трейдхолл.");
         return $a.length === 1;
@@ -508,10 +671,10 @@ function hasTradeHall(html, my) {
  * @param tagname имя тэга. tr, td, span и так далее
  */
 function closestByTagName(items, tagname) {
-    var tag = tagname.toUpperCase();
-    var found = [];
-    for (var i = 0; i < items.length; i++) {
-        var node = items[i];
+    let tag = tagname.toUpperCase();
+    let found = [];
+    for (let i = 0; i < items.length; i++) {
+        let node = items[i];
         while ((node = node.parentNode) && node.nodeName != tag) { }
         ;
         if (node)
@@ -526,10 +689,10 @@ function closestByTagName(items, tagname) {
  */
 function getOnlyText(item) {
     // просто children() не отдает текстовые ноды.
-    var $childrenNodes = item.contents();
-    var res = [];
-    for (var i = 0; i < $childrenNodes.length; i++) {
-        var el = $childrenNodes.get(i);
+    let $childrenNodes = item.contents();
+    let res = [];
+    for (let i = 0; i < $childrenNodes.length; i++) {
+        let el = $childrenNodes.get(i);
         if (el.nodeType === 3)
             res.push($(el).text()); // так как в разных браузерах текст запрашивается по разному, 
     }
@@ -541,9 +704,9 @@ function getOnlyText(item) {
  * @param selector
  */
 function oneOrError($item, selector) {
-    var $one = $item.find(selector);
+    let $one = $item.find(selector);
     if ($one.length != 1)
-        throw new Error("\u041D\u0430\u0439\u0434\u0435\u043D\u043E " + $one.length + " \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u043E\u0432 \u0432\u043C\u0435\u0441\u0442\u043E 1 \u0434\u043B\u044F \u0441\u0435\u043B\u0435\u043A\u0442\u043E\u0440\u0430 " + selector);
+        throw new Error(`Найдено ${$one.length} элементов вместо 1 для селектора ${selector}`);
     return $one;
 }
 // AJAX ----------------------------------------
@@ -557,14 +720,14 @@ function doRepage(pages, $html) {
     // снизу всегда несколько кнопок для числа страниц, НО одна может быть уже нажата мы не знаем какая
     // берем просто любую ненажатую, извлекаем ее текст, на у далее в ссылке всегда
     // есть число такое же как текст в кнопке. Заменяем на свое и все ок.
-    var $pager = $html.find('ul.pager_options li').has("a").last();
-    var num = $pager.text().trim();
-    var pagerUrl = $pager.find('a').attr('href').replace(num, pages.toString());
+    let $pager = $html.find('ul.pager_options li').has("a").last();
+    let num = $pager.text().trim();
+    let pagerUrl = $pager.find('a').attr('href').replace(num, pages.toString());
     // запросили обновление пагинации, дальше юзер решает что ему делать с этим
-    var deffered = $.Deferred();
+    let deffered = $.Deferred();
     $.get(pagerUrl)
-        .done(function (data, status, jqXHR) { return deffered.resolve(data); })
-        .fail(function (err) { return deffered.reject("Не удалось установить пагинацию => " + err); });
+        .done((data, status, jqXHR) => deffered.resolve(data))
+        .fail((err) => deffered.reject("Не удалось установить пагинацию => " + err));
     return deffered.promise();
 }
 /**
@@ -575,28 +738,25 @@ function doRepage(pages, $html) {
  * @param timeout
  * @param repage нужно ли убирать пагинацию
  */
-function getPage(url, retries, timeout, repage) {
-    if (retries === void 0) { retries = 10; }
-    if (timeout === void 0) { timeout = 1000; }
-    if (repage === void 0) { repage = true; }
-    var deffered = $.Deferred();
+function getPage(url, retries = 10, timeout = 1000, repage = true) {
+    let deffered = $.Deferred();
     // сначала запросим саму страницу с перезапросом по ошибке
     tryGet(url, retries, timeout)
-        .then(function (html) {
-        var locdef = $.Deferred();
+        .then((html) => {
+        let locdef = $.Deferred();
         if (html == null) {
             locdef.reject("неизвестная ошибка. страница пришла пустая " + url);
             return locdef.promise();
         }
         // если страниц нет, то как бы не надо ничо репейджить
         // если не надо репейджить то тоже не будем
-        var $html = $(html);
+        let $html = $(html);
         if (!repage || !hasPages($html)) {
             deffered.resolve(html);
         }
         else {
             // репейджим
-            var purl = getRepageUrl($html, 10000);
+            let purl = getRepageUrl($html, 10000);
             if (purl == null)
                 locdef.reject("не смог вытащить урл репейджа хотя он там должен быть");
             else
@@ -604,16 +764,16 @@ function getPage(url, retries, timeout, repage) {
         }
         return locdef.promise();
     }) // если нет репейджа все закончится тут
-        .then(function (purl) {
-        var locdef = $.Deferred();
+        .then((purl) => {
+        let locdef = $.Deferred();
         tryGet(purl, retries, timeout)
-            .done(function () { return locdef.resolve(); })
-            .fail(function (err) { return locdef.reject("ошибка репейджа => " + err); });
+            .done(() => locdef.resolve())
+            .fail((err) => locdef.reject("ошибка репейджа => " + err));
         return locdef.promise();
     }) // запросим установку репейджа
-        .then(function () { return tryGet(url, retries, timeout); }) // снова запросим страницу
-        .then(function (html) { return deffered.resolve(html); })
-        .fail(function (err) { return deffered.reject(err); });
+        .then(() => tryGet(url, retries, timeout)) // снова запросим страницу
+        .then((html) => deffered.resolve(html))
+        .fail((err) => deffered.reject(err));
     return deffered.promise();
 }
 /**
@@ -623,24 +783,22 @@ function getPage(url, retries, timeout, repage) {
  * @param retries число попыток загрузки
  * @param timeout таймаут между попытками
  */
-function tryGet(url, retries, timeout) {
-    if (retries === void 0) { retries = 10; }
-    if (timeout === void 0) { timeout = 1000; }
-    var $deffered = $.Deferred();
+function tryGet(url, retries = 10, timeout = 1000) {
+    let $deffered = $.Deferred();
     $deffered.notify("0: " + url); // сразу даем уведомление, это работает. НО только 1 сработает если вызвать ДО установки прогресс хендлера на промис
     $.ajax({
         url: url,
         type: "GET",
-        success: function (data, status, jqXHR) { return $deffered.resolve(data); },
+        success: (data, status, jqXHR) => $deffered.resolve(data),
         error: function (jqXHR, textStatus, errorThrown) {
             retries--;
             if (retries <= 0) {
                 $deffered.reject("Не смог загрузить страницу " + this.url);
                 return;
             }
-            logDebug("\u043E\u0448\u0438\u0431\u043A\u0430 \u0437\u0430\u043F\u0440\u043E\u0441\u0430 " + this.url + " \u043E\u0441\u0442\u0430\u043B\u043E\u0441\u044C " + retries + " \u043F\u043E\u043F\u044B\u0442\u043E\u043A");
-            var _this = this;
-            setTimeout(function () {
+            logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+            let _this = this;
+            setTimeout(() => {
                 $deffered.notify("0: " + url); // уведомляем об очередном запросе
                 $.ajax(_this);
             }, timeout);
@@ -648,19 +806,187 @@ function tryGet(url, retries, timeout) {
     });
     return $deffered.promise();
 }
+/**
+ * Запрашивает страницу. При ошибке поробует повторить запрос через заданное число секунд.
+ * Пробует заданное число попыток, после чего возвращает reject.
+ * При ресолве вернет текст страницы, а при реджекте вернет Error объект
+ * @param url
+ * @param retries число попыток загрузки
+ * @param timeout таймаут между попытками
+ * @param beforeGet вызывается перед каждым новым запросом. То есть число вызовов равно числу запросов. Каждый раз вызывается с урлом которые запрашивается.
+ */
+function tryGet_async(url, retries = 10, timeout = 1000, beforeGet, onError) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
+        let $deffered = $.Deferred();
+        if (beforeGet) {
+            try {
+                beforeGet(url);
+            }
+            catch (err) {
+                logDebug("beforeGet вызвал исключение", err);
+            }
+        }
+        $.ajax({
+            url: url,
+            type: "GET",
+            success: (data, status, jqXHR) => $deffered.resolve(data),
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (onError) {
+                    try {
+                        onError(url);
+                    }
+                    catch (err) {
+                        logDebug("onError вызвал исключение", err);
+                    }
+                }
+                retries--;
+                if (retries <= 0) {
+                    let err = new Error(`can't get ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
+                    $deffered.reject(err);
+                    return;
+                }
+                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                let _this = this;
+                setTimeout(() => {
+                    if (beforeGet) {
+                        try {
+                            beforeGet(url);
+                        }
+                        catch (err) {
+                            logDebug("beforeGet вызвал исключение", err);
+                        }
+                    }
+                    $.ajax(_this);
+                }, timeout);
+            }
+        });
+        return $deffered.promise();
+    });
+}
+/**
+ * Отправляет данные на сервер запросом POST. В остальном работает как и гет. Так же вернет промис который ресолвит с возвращенными данными
+ * @param url
+ * @param form данные для отправки на сервер
+ * @param retries
+ * @param timeout
+ * @param beforePost
+ */
+function tryPost_async(url, form, retries = 10, timeout = 1000, beforePost, onError) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
+        let $deferred = $.Deferred();
+        if (beforePost) {
+            try {
+                beforePost(url);
+            }
+            catch (err) {
+                logDebug("beforePost вызвал исключение", err);
+            }
+        }
+        $.ajax({
+            url: url,
+            data: form,
+            type: "POST",
+            success: (data, status, jqXHR) => $deferred.resolve(data),
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (onError) {
+                    try {
+                        onError(url);
+                    }
+                    catch (err) {
+                        logDebug("onError вызвал исключение", err);
+                    }
+                }
+                retries--;
+                if (retries <= 0) {
+                    let err = new Error(`can't post ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
+                    $deferred.reject(err);
+                    return;
+                }
+                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                let _this = this;
+                setTimeout(() => {
+                    if (beforePost) {
+                        try {
+                            beforePost(url);
+                        }
+                        catch (err) {
+                            logDebug("beforePost вызвал исключение", err);
+                        }
+                    }
+                    $.ajax(_this);
+                }, timeout);
+            }
+        });
+        return $deferred.promise();
+    });
+}
+/**
+ * Отправляет данные на сервер запросом POST. В остальном работает как и гет. Так же вернет промис который ресолвит с возвращенными данными
+ * @param url
+ * @param data данные для отправки на сервер
+ * @param retries
+ * @param timeout
+ * @param beforePost
+ */
+function tryPostJSON_async(url, data, retries = 10, timeout = 1000, beforePost, onError) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
+        let $deferred = $.Deferred();
+        if (beforePost) {
+            try {
+                beforePost(url);
+            }
+            catch (err) {
+                logDebug("beforePost вызвал исключение", err);
+            }
+        }
+        $.ajax({
+            url: url,
+            data: data,
+            type: "POST",
+            dataType: 'JSON',
+            success: (data, status, jqXHR) => $deferred.resolve(data),
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (onError) {
+                    try {
+                        onError(url);
+                    }
+                    catch (err) {
+                        logDebug("onError вызвал исключение", err);
+                    }
+                }
+                retries--;
+                if (retries <= 0) {
+                    let err = new Error(`can't post ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
+                    $deferred.reject(err);
+                    return;
+                }
+                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                let _this = this;
+                setTimeout(() => {
+                    if (beforePost) {
+                        try {
+                            beforePost(url);
+                        }
+                        catch (err) {
+                            logDebug("beforePost вызвал исключение", err);
+                        }
+                    }
+                    $.ajax(_this);
+                }, timeout);
+            }
+        });
+        return $deferred.promise();
+    });
+}
 // COMMON ----------------------------------------
-var $xioDebug = false;
-function logDebug(msg) {
-    var args = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        args[_i - 1] = arguments[_i];
-    }
+let $xioDebug = false;
+function logDebug(msg, ...args) {
     if (!$xioDebug)
         return;
-    if (args.length === 0)
-        console.log(msg);
-    else
-        console.log(msg, args);
+    console.log(msg, ...args);
 }
 /**
  * определяет есть ли на странице несколько страниц которые нужно перелистывать или все влазит на одну
@@ -672,7 +998,7 @@ function hasPages($html) {
     if ($html == null)
         $html = $(document);
     // там не только кнопки страниц но еще и текст Страницы в первом li поэтому > 2
-    var $pageLinks = $html.find('ul.pager_list li');
+    let $pageLinks = $html.find('ul.pager_list li');
     return $pageLinks.length > 2;
 }
 /**
@@ -680,15 +1006,14 @@ function hasPages($html) {
  * @param $html
  * @param pages число элементов на страницу которое установить
  */
-function getRepageUrl($html, pages) {
-    if (pages === void 0) { pages = 10000; }
+function getRepageUrl($html, pages = 10000) {
     if (!hasPages($html))
         return null;
     // снизу всегда несколько кнопок для числа страниц, НО одна может быть уже нажата мы не знаем какая
     // берем просто любую ненажатую, извлекаем ее текст, на у далее в ссылке всегда
     // есть число такое же как текст в кнопке. Заменяем на свое и все ок.
-    var $pager = $html.find('ul.pager_options li').has("a").last();
-    var num = $pager.text().trim();
+    let $pager = $html.find('ul.pager_options li').has("a").last();
+    let num = $pager.text().trim();
     return $pager.find('a').attr('href').replace(num, pages.toString());
 }
 // SAVE & LOAD ------------------------------------
@@ -705,12 +1030,83 @@ function buildStoreKey(realm, code, subid) {
         throw new RangeError("Параметр realm не может быть равен '' ");
     if (subid != null && realm == null)
         throw new RangeError("Как бы нет смысла указывать subid и не указывать realm");
-    var res = "^*"; // уникальная ботва которую добавляем ко всем своим данным
+    let res = "^*"; // уникальная ботва которую добавляем ко всем своим данным
     if (realm != null)
         res += "_" + realm;
     if (subid != null)
         res += "_" + subid;
     res += "_" + code;
     return res;
+}
+/**
+ * Выводит текстовое поле, куда выводит все ключи с содержимым в формате ключ=значение|ключи=значение...
+ * @param test функция возвращающая ИСТИНУ если данный ключик надо экспортить, иначе ЛОЖЬ
+ * @param $place элемент страницы в который будет добавлено текстовое поле для вывода
+ */
+function Export($place, test) {
+    if ($place.length <= 0)
+        return false;
+    if ($place.find("#txtExport").length > 0) {
+        $place.find("#txtExport").remove();
+        return;
+    }
+    let $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
+    let string = "";
+    for (let key in localStorage) {
+        if (!test(key))
+            continue;
+        if (string.length > 0)
+            string += "|";
+        string += `${key}=${localStorage[key]}`;
+    }
+    $txt.text(string);
+    $place.append($txt);
+    return true;
+}
+/**
+ * Импортирует в кэш данные введенные к текстовое окно. Формат данных такой же как в экспорте
+ * Ключ=Значение|Ключ=Значение итд.
+ * Если что то не заладится, будет выпадать с ошибкой. Существующие ключи перезаписывает, с уведомление в консоли
+ * @param $place элемент страницы в который будет добавлено текстовое поле для ввода
+ */
+function Import($place) {
+    if ($place.length <= 0)
+        return false;
+    if ($place.find("#txtImport").length > 0) {
+        $place.find("#txtImport").remove();
+        $place.find("#saveImport").remove();
+        return;
+    }
+    let $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
+    let $saveBtn = $(`<input id="saveImport" type=button disabled="true" value="Save!">`);
+    $txt.on("input propertychange", (event) => $saveBtn.prop("disabled", false));
+    $saveBtn.on("click", (event) => {
+        let items = $txt.val().split("|"); // элементы вида Ключ=значение
+        logDebug(`загружено ${items.length} элементов`);
+        try {
+            items.forEach((val, i, arr) => {
+                let item = val.trim();
+                if (item.length <= 0)
+                    throw new Error(`получили пустую строку для элемента ${i}, невозможно импортировать.`);
+                let kvp = item.split("="); // пара ключ значение
+                if (kvp.length !== 2)
+                    throw new Error("Должен быть только ключ и значение а по факту не так. " + item);
+                let storeKey = kvp[0].trim();
+                let storeVal = kvp[1].trim();
+                if (storeKey.length <= 0 || storeVal.length <= 0)
+                    throw new Error("Длина ключа или данных равна 0 " + item);
+                if (localStorage[storeKey])
+                    logDebug(`Ключ ${storeKey} существует. Перезаписываем.`);
+                localStorage[storeKey] = storeVal;
+            });
+            alert("импорт завершен");
+        }
+        catch (err) {
+            let msg = err.message;
+            alert(msg);
+        }
+    });
+    $place.append($txt).append($saveBtn);
+    return true;
 }
 //# sourceMappingURL=jsHelper.js.map

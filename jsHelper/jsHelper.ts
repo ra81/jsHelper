@@ -30,6 +30,7 @@ enum UnitTypes {
     power,
     coal_power,
     incinerator_power,
+    oil_power,
     fuel,
     repair,
     apiary,
@@ -44,6 +45,20 @@ enum UnitTypes {
 // уровни сервиса
 enum ServiceLevels{
     none= -1, lower = 0, low, normal, high, higher, elite
+}
+
+/**
+ * Простенький конвертер, который из множества формирует массив значений множества. По факту массив чисел.
+   используется внутреннее представление множеств и как бы может сломаться в будущем
+ * @param enumType тип множества
+ */
+function enum2Arr<T>(enumType: any): T[] {
+    let res: T[] = [];
+    for (let key in enumType) {
+        if (typeof enumType[key] === "number")
+            res.push(enumType[key] as any as T);
+    }
+    return res;
 }
 
 /**
@@ -530,7 +545,8 @@ function sayNumber(num: number): string {
 }
 
 /**
- * Для денег подставляет нужный символ при выводе на экран
+ * Для денег подставляет нужный символ при выводе на экран. Округляет до 2 знаков,
+   так же вставляет пробелы как разделитель для тысяч
  * @param num
  * @param symbol
  */
@@ -594,10 +610,11 @@ let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i;           // в
 let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i;     // главная юнита
 let url_unit_finance_report = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
 let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i;    // торговый зал
-let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?$/i; // история продаж в магазине по товару
+let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
 let url_supp_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
 let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale/i;        // продажа склад/завод
 let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
+let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
 
 let url_supply_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
 let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i;   // заказ оборудования на завод, лабу или куда то еще
@@ -1245,7 +1262,12 @@ function Export($place: JQuery, test: (key: string) => boolean) {
     if ($place.length <= 0)
         return false;
 
-    let $txt = $('<textarea style="width: 800px; height: 200px"></textarea>');
+    if ($place.find("#txtExport").length > 0) {
+        $place.find("#txtExport").remove();
+        return;
+    }
+
+    let $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
 
     let string = "";
     for (let key in localStorage) {
@@ -1259,7 +1281,7 @@ function Export($place: JQuery, test: (key: string) => boolean) {
     }
 
     $txt.text(string);
-    $place.append("<br>").append($txt);
+    $place.append($txt);
     return true;
 }
 
@@ -1274,37 +1296,48 @@ function Import($place: JQuery) {
     if ($place.length <= 0)
         return false;
 
-    let $txt = $('<textarea style="width: 800px; height: 200px"></textarea>');
-    let $saveBtn = $(`<input type=button disabled="true" value="Save!">`);
+    if ($place.find("#txtImport").length > 0) {
+        $place.find("#txtImport").remove();
+        $place.find("#saveImport").remove();
+        return;
+    }
+
+    let $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
+    let $saveBtn = $(`<input id="saveImport" type=button disabled="true" value="Save!">`);
 
     $txt.on("input propertychange", (event) => $saveBtn.prop("disabled", false));
     $saveBtn.on("click", (event) => {
         let items = ($txt.val() as string).split("|"); // элементы вида Ключ=значение
         logDebug(`загружено ${items.length} элементов`);
 
-        items.forEach((val, i, arr) => {
-            let item = val.trim();
-            if (item.length <= 0)
-                throw new Error(`получили пустую строку для элемента ${i}, невозможно импортировать.`);
+        try {
+            items.forEach((val, i, arr) => {
+                let item = val.trim();
+                if (item.length <= 0)
+                    throw new Error(`получили пустую строку для элемента ${i}, невозможно импортировать.`);
 
-            let kvp = item.split("="); // пара ключ значение
-            if (kvp.length !== 2)
-                throw new Error("Должен быть только ключ и значение а по факту не так. " + item);
+                let kvp = item.split("="); // пара ключ значение
+                if (kvp.length !== 2)
+                    throw new Error("Должен быть только ключ и значение а по факту не так. " + item);
 
-            let storeKey = kvp[0].trim();
-            let storeVal = kvp[1].trim();
-            if (storeKey.length <= 0 || storeVal.length <= 0)
-                throw new Error("Длина ключа или данных равна 0 " + item);
+                let storeKey = kvp[0].trim();
+                let storeVal = kvp[1].trim();
+                if (storeKey.length <= 0 || storeVal.length <= 0)
+                    throw new Error("Длина ключа или данных равна 0 " + item);
 
-            if (localStorage[storeKey])
-                logDebug(`Ключ ${storeKey} существует. Перезаписываем.`);
+                if (localStorage[storeKey])
+                    logDebug(`Ключ ${storeKey} существует. Перезаписываем.`);
 
-            localStorage[storeKey] = storeVal;
-        });
-
-        logDebug("импорт завершен");
+                localStorage[storeKey] = storeVal;
+            });
+            alert("импорт завершен");
+        }
+        catch (err) {
+            let msg = (err as Error).message;
+            alert(msg);
+        }
     });
 
-    $place.append("<br>").append($txt).append("<br>").append($saveBtn);
+    $place.append($txt).append($saveBtn);
     return true;
 }
