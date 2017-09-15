@@ -136,6 +136,48 @@ function filterDictVal<T>(dict: IDictionary<T>, selector: (el: T) => boolean) {
     return res;
 }
 
+/**
+ * Склеивает два словаря вместе. Ключи не теряются, если есть одинаковые то вывалит ошибку
+ * @param dict1
+ * @param dict2
+ */
+function mergeDict<T>(dict1: IDictionary<T>, dict2: IDictionary<T>) {
+    if (dict1 == null || dict2 == null)
+        throw new Error("аргументы не должны быть null");
+
+    let res: IDictionary<T> = {};
+
+    for (let key in dict1)
+        res[key] = dict1[key];
+
+    for (let key in dict2) {
+        if (res[key] != null)
+            throw new Error(`dict1 уже имеет такой же ключ '${key}' как и dict2`);
+
+        res[key] = dict2[key];
+    }
+
+    return res;
+}
+function mergeDictN<T>(dict1: IDictionaryN<T>, dict2: IDictionaryN<T>) {
+    if (dict1 == null || dict2 == null)
+        throw new Error("аргументы не должны быть null");
+
+    let res: IDictionaryN<T> = {};
+
+    for (let key in dict1)
+        res[key] = dict1[key];
+
+    for (let key in dict2) {
+        if (res[key] != null)
+            throw new Error(`dict1 уже имеет такой же ключ '${key}' как и dict2`);
+
+        res[key] = dict2[key];
+    }
+
+    return res;
+}
+
 
 /**
  * Проверяет что элемент есть в массиве.
@@ -464,6 +506,13 @@ function extractDate(str: string): Date|null {
 
     return new Date(y, mon, d);
 }
+function extractDateOrError(str: string): Date {
+    let dt = extractDate(str);
+    if (dt == null)
+        throw new Error(`Не получилось извлечь дату из "${str}"`);
+
+    return dt;
+}
 
 /**
  * из даты формирует короткую строку типа 01.12.2017
@@ -508,7 +557,7 @@ function dateFromShort(str: string): Date {
  */
 function sayNumber(num: number): string {
     if (num < 0)
-        return "-" + sayMoney(-num);
+        return "-" + sayNumber(-num);
 
     if (Math.round(num * 100) / 100 - Math.round(num))
         num = Math.round(num * 100) / 100;
@@ -601,6 +650,17 @@ function formatStr(str: string, ...args: any[]): string {
     return res;
 }
 
+/**
+ * если значение null то вывалит ошибку, иначе вернет само значение. Короткий метод для проверок на нулл
+ * @param val
+ */
+function nullCheck<T>(val: T | null) {
+
+    if (val == null)
+        throw new Error(`nullCheck Error`);
+
+    return val;
+}
 
 // РЕГУЛЯРКИ ДЛЯ ССЫЛОК ------------------------------------
 
@@ -611,12 +671,12 @@ let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i;     // г
 let url_unit_finance_report = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
 let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i;    // торговый зал
 let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
-let url_supp_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
-let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale/i;        // продажа склад/завод
+let url_supply_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
+let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale\/?/i;        // продажа склад/завод
 let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
 let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
 
-let url_supply_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
+let url_supply_create_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
 let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i;   // заказ оборудования на завод, лабу или куда то еще
 
 // для компании
@@ -632,7 +692,11 @@ let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee
 // 
 let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
 let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i;   // страница со всеми товарами игры
+let url_trade_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/trading$/i;   // страница с торгуемыми товарами
 let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
+let url_products_size_rx = /\/[a-z]+\/main\/industry\/unit_type\/info\/2011\/volume\/?/i;  // размеры продуктов на склада
+let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i;    // таможенные пошлины и ИЦ
+let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i;    // брендовые товары список
 
 /**
  * По заданной ссылке и хтмл определяет находимся ли мы внутри юнита или нет.
@@ -757,6 +821,17 @@ function isShop(html: HTMLDocument, my: boolean = true): boolean {
 
     return $img.length > 0;
 }
+
+function isWarehouse($html: JQuery): boolean {
+
+    // нет разницы наш или чужой юнит везде картинка мага нужна. ее нет только если window
+    let $img = $html.find("#unitImage img[src*='/warehouse_']");
+    if ($img.length > 1)
+        throw new Error(`Найдено несколько (${$img.length}) картинок Склада.`);
+
+    return $img.length > 0;
+}
+
 
 /**
  * Возвращает Истину если данная страница есть страница в заправке своей или чужой. Иначе Ложь
@@ -981,9 +1056,11 @@ function tryGet(url: string, retries: number = 10, timeout: number = 1000): JQue
  * @param beforeGet вызывается перед каждым новым запросом. То есть число вызовов равно числу запросов. Каждый раз вызывается с урлом которые запрашивается.
  */
 async function tryGet_async(url: string, retries: number = 10, timeout: number = 1000, beforeGet?: IAction1<string>, onError?: IAction1<string>): Promise<any> {
+    //logDebug(`tryGet_async: ${url}`);
+
     // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
     let $deffered = $.Deferred<string>();
-
+    
     if (beforeGet) {
         try {
             beforeGet(url);
@@ -1253,18 +1330,69 @@ function buildStoreKey(realm: string | null, code: string, subid?: number): stri
 }
 
 /**
+ * Возвращает все ключи ЮНИТОВ для заданного реалма и КОДА. 
+ * @param realm
+ * @param storeKey код ключа sh, udd, vh итд
+ */
+function getStoredUnitsKeys(realm: string, storeKey: string) {
+
+    let res: string[] = [];
+    for (let key in localStorage) {
+        // если в ключе нет числа, не брать его
+        let m = extractIntPositive(key);
+        if (m == null)
+            continue;
+
+        // если ключик не совпадает со старым ключем для посетителей
+        let subid = m[0];
+        if (key !== buildStoreKey(realm, storeKey, subid))
+            continue;
+
+        res.push(key);
+    }
+
+    return res;
+}
+
+/**
+ * Возвращает все ключи ЮНИТОВ для заданного реалма и КОДА. А так же subid юнита отдельно
+ * @param realm
+ * @param storeKey код ключа sh, udd, vh итд
+ */
+function getStoredUnitsKeysA(realm: string, storeKey: string): [string, number][] {
+
+    let res: [string,number][] = [];
+    for (let key in localStorage) {
+        // если в ключе нет числа, не брать его
+        let m = extractIntPositive(key);
+        if (m == null)
+            continue;
+
+        // если ключик не совпадает со старым ключем для посетителей
+        let subid = m[0];
+        if (key !== buildStoreKey(realm, storeKey, subid))
+            continue;
+
+        res.push([key, subid]);
+    }
+
+    return res;
+}
+
+
+/**
  * Выводит текстовое поле, куда выводит все ключи с содержимым в формате ключ=значение|ключи=значение...
  * @param test функция возвращающая ИСТИНУ если данный ключик надо экспортить, иначе ЛОЖЬ
  * @param $place элемент страницы в который будет добавлено текстовое поле для вывода
  */
-function Export($place: JQuery, test: (key: string) => boolean) {
+function Export($place: JQuery, test: (key: string) => boolean): boolean {
 
     if ($place.length <= 0)
         return false;
 
     if ($place.find("#txtExport").length > 0) {
         $place.find("#txtExport").remove();
-        return;
+        return false;
     }
 
     let $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
@@ -1284,6 +1412,32 @@ function Export($place: JQuery, test: (key: string) => boolean) {
     $place.append($txt);
     return true;
 }
+function ExportA($place: JQuery, keys: string[], converter: (val: string) => string, delim: string ="\n"): boolean {
+
+    if ($place.length <= 0)
+        return false;
+
+    if ($place.find("#txtExport").length > 0) {
+        $place.find("#txtExport").remove();
+        return false;
+    }
+
+    let $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
+
+    let exportStr = "";
+    for (let key of keys) {
+        if (exportStr.length > 0)
+            exportStr += delim;
+
+        let item = converter == null ? localStorage[key] : converter(localStorage[key]);
+        exportStr += `${key}=${item}`;
+    }
+
+    $txt.text(exportStr);
+    $place.append($txt);
+    return true;
+}
+
 
 /**
  * Импортирует в кэш данные введенные к текстовое окно. Формат данных такой же как в экспорте
@@ -1291,7 +1445,7 @@ function Export($place: JQuery, test: (key: string) => boolean) {
  * Если что то не заладится, будет выпадать с ошибкой. Существующие ключи перезаписывает, с уведомление в консоли
  * @param $place элемент страницы в который будет добавлено текстовое поле для ввода
  */
-function Import($place: JQuery) {
+function Import($place: JQuery): boolean {
 
     if ($place.length <= 0)
         return false;
@@ -1299,7 +1453,7 @@ function Import($place: JQuery) {
     if ($place.find("#txtImport").length > 0) {
         $place.find("#txtImport").remove();
         $place.find("#saveImport").remove();
-        return;
+        return false;
     }
 
     let $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
@@ -1325,10 +1479,60 @@ function Import($place: JQuery) {
                 if (storeKey.length <= 0 || storeVal.length <= 0)
                     throw new Error("Длина ключа или данных равна 0 " + item);
 
-                if (localStorage[storeKey])
+                if (localStorage[storeKey] != null)
                     logDebug(`Ключ ${storeKey} существует. Перезаписываем.`);
 
                 localStorage[storeKey] = storeVal;
+            });
+            alert("импорт завершен");
+        }
+        catch (err) {
+            let msg = (err as Error).message;
+            alert(msg);
+        }
+    });
+
+    $place.append($txt).append($saveBtn);
+    return true;
+}
+function ImportA($place: JQuery, converter: (val: string) => string, delim: string = "\n"): boolean {
+
+    if ($place.length <= 0)
+        return false;
+
+    if ($place.find("#txtImport").length > 0) {
+        $place.find("#txtImport").remove();
+        $place.find("#saveImport").remove();
+        return false;
+    }
+
+    let $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
+    let $saveBtn = $(`<input id="saveImport" type=button disabled="true" value="Save!">`);
+
+    $txt.on("input propertychange", (event) => $saveBtn.prop("disabled", false));
+    $saveBtn.on("click", (event) => {
+        let items = ($txt.val() as string).split(delim); // элементы вида Ключ=значение
+        logDebug(`загружено ${items.length} элементов`);
+
+        try {
+            items.forEach((val, i, arr) => {
+                let item = val.trim();
+                if (item.length <= 0)
+                    throw new Error(`получили пустую строку для элемента ${i}, невозможно импортировать.`);
+
+                let kvp = item.split("="); // пара ключ значение
+                if (kvp.length !== 2)
+                    throw new Error("Должен быть только ключ и значение а по факту не так. " + item);
+
+                let storeKey = kvp[0].trim();
+                let storeVal = kvp[1].trim();
+                if (storeKey.length <= 0 || storeVal.length <= 0)
+                    throw new Error("Длина ключа или данных равна 0 " + item);
+
+                if (localStorage[storeKey] != null)
+                    logDebug(`Ключ ${storeKey} существует. Перезаписываем.`);
+
+                localStorage[storeKey] = converter == null ? storeVal : converter(storeVal);
             });
             alert("импорт завершен");
         }
