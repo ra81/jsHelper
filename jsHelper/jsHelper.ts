@@ -34,12 +34,10 @@ enum UnitTypes {
     fuel,
     repair,
     apiary,
-    educational,
-    kindergarten,
+    educational, kindergarten,  // картинка внутри юнита для образовательных и в списке
     sun_power,
     network,
-    it,
-    cellular
+    it, cellular, // в юните и в списке
 }
 
 // уровни сервиса
