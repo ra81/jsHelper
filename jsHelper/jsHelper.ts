@@ -326,6 +326,11 @@ interface IAction1<T> {
     (arg: T): void;
 }
 
+interface IFunction1<Tin, Tout> {
+    (par1: Tin): Tout;
+}
+
+
 // PARSE -------------------------------------------
 
 /**
@@ -359,12 +364,20 @@ function getRealmOrError(): string {
 }
 
 /**
- * Парсит id компании со страницы и выдает ошибку если не может спарсить
+ * Парсит id компании со страницы. Если не получилось то вернет null
  */
-function getCompanyId() {
-    let str = matchedOrError($("a.dashboard").attr("href"), /\d+/);
+function parseCompanyId(html: any): number | null {
+    let $html = $(html);
 
-    return numberfyOrError(str);
+    let href = $html.find("a.dashboard").attr("href");
+    if (href == null || href.length <= 0)
+        return null;
+
+    let arr = href.match(/\d+/);
+    if (arr == null || arr.length !== 1)
+        return null;
+
+    return numberfyOrError(arr[0]);
 }
 
 /**
@@ -607,13 +620,45 @@ function sayMoney(num: number, symbol:string="$") {
 }
 
 /**
+ * Пробует взять со страницы тип юнита
+ * Сейчас эта хня берется из классов вида
+   <div class="picture bg-page-unit-header-kindergarten"></div>
+ * Он кореллирует четко с i-kindergarten в списке юнитов
+ * Если картинки на странице нет, то вернет null. Сам разбирайся почему ее там нет
+   Может выдать ошибку если тип не был найден в списке типов
+ * @param $html
+ */
+//function getUnitType($html: JQuery): UnitTypes | null {
+
+//    let $div = $html.find("div.picture");
+//    if ($div.length !== 1)
+//        return null;
+
+//    let typeStr = "";
+//    let classList = $div.attr("class").split(/\s+/);
+//    for (let cl of classList) {
+//        if (cl.startsWith("bg-page-unit-header-") == false)
+//            continue;
+
+//        // вырезаем тупо "bg-page-unit-header-"
+//        typeStr = cl.slice(20);
+//    }
+
+//    // некоторый онанизм с конверсией но никак иначе
+//    let type: UnitTypes = (UnitTypes as any)[typeStr] ? (UnitTypes as any)[typeStr] : UnitTypes.unknown;
+//    if (type == UnitTypes.unknown)
+//        throw new Error("Не описан тип юнита " + typeStr);
+
+//    return type;
+//}
+/**
  * Пробует взять со страницы картинку юнита и спарсить тип юнита
  * Пример сорса /img/v2/units/shop_1.gif  будет тип shop.
  * Он кореллирует четко с i-shop в списке юнитов
  * Если картинки на странице нет, то вернет null. Сам разбирайся почему ее там нет
  * @param $html
  */
-function getUnitType($html: JQuery): UnitTypes | null {
+function getUnitTypeOld($html: JQuery): UnitTypes | null {
 
     let $div = $html.find("#unitImage");
     if ($div.length === 0)
@@ -664,37 +709,78 @@ function nullCheck<T>(val: T | null) {
 
 // для 1 юнита
 // 
-let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i;           // внутри юнита. любая страница
-let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i;     // главная юнита
-let url_unit_finance_report = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
-let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i;    // торговый зал
-let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
-let url_supply_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
-let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale\/?/i;        // продажа склад/завод
-let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
-let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
+//let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i;           // внутри юнита. любая страница
+//let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i;     // главная юнита
+//let url_unit_finrep_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
+//let url_unit_finrep_by_prod_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i; // финанс отчет по товарам
+//let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i;    // торговый зал
+//let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
+//let url_supply_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
+//let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale\/?/i;        // продажа склад/завод
+//let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
+//let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
 
-let url_supply_create_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
-let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i;   // заказ оборудования на завод, лабу или куда то еще
+//let url_supply_create_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
+//let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i;   // заказ оборудования на завод, лабу или куда то еще
 
 // для компании
 // 
-let url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i;     // список юнитов. Работает и для списка юнитов чужой компании
-let url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i;  // отчет по подразделениями из отчетов
-let url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i;  // отчет по рекламным акциям
-let url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i;     // в окне управления юнитами групповой ремонт или закупка оборудования
-let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i;     // управление - персонал
+//let url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i;     // список юнитов. Работает и для списка юнитов чужой компании
+//let url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i;  // отчет по подразделениями из отчетов
+//let url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i;  // отчет по рекламным акциям
+//let url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i;     // в окне управления юнитами групповой ремонт или закупка оборудования
+//let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i;     // управление - персонал
 
 
 // для для виртономики
 // 
-let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
-let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i;   // страница со всеми товарами игры
-let url_trade_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/trading$/i;   // страница с торгуемыми товарами
-let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
-let url_products_size_rx = /\/[a-z]+\/main\/industry\/unit_type\/info\/2011\/volume\/?/i;  // размеры продуктов на склада
-let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i;    // таможенные пошлины и ИЦ
-let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i;    // брендовые товары список
+//let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
+//let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i;   // страница со всеми товарами игры
+//let url_trade_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/trading$/i;   // страница с торгуемыми товарами
+//let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
+//let url_products_size_rx = /\/[a-z]+\/main\/industry\/unit_type\/info\/2011\/volume\/?/i;  // размеры продуктов на склада
+//let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i;    // таможенные пошлины и ИЦ
+// let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i;    // брендовые товары список
+
+let Url_rx = {
+    // для виртономики
+    v_city_retail_report: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i, // розничный отчет по конкретному товару
+    v_tm_info: /\/[a-z]+\/(?:main|window)\/globalreport\/tm\/info\/?$/i,                        // брендовые товары список
+    v_country_duties: /\/[a-z]+\/(?:main|window)\/geo\/countrydutylist\/\d+\/?/i,               // таможенные пошлины и ИЦ
+    v_regions: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/region\/?$/i, // список регионов
+    v_countries: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/country\/?$/i, 
+    v_cities: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/city\/?$/i,
+    v_products_size: /\/[a-z]+\/(?:main|window)\/industry\/unit_type\/info\/2011\/volume\/?/i,  // размеры продуктов на склада
+    v_media_rep_spec: /\/[a-z]+\/(?:main|window)\/mediareport\/\d+/i,                   // аналитический отчет по спецухам
+    v_global_products: /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i,  // Аналитика - Маркетинг - Продукция
+    v_products: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/products$/i,             // страница со всеми товарами игры
+    v_trade_products: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/trading$/i,        // страница с торгуемыми товарами
+    v_energy_price: /\/[a-z]+\/(?:main|window)\/geo\/tariff\/\d+/i,        // тарифы на энергию
+    v_product_suppliers: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i,   // поставщики продукта на реалме
+
+    // для компании в целом
+    top_manager: /\/[a-z]+\/(?:main|window)\/user\/privat\/persondata\/knowledge\/?$/ig,    // квалификации менеджера
+    comp_ads_rep: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/marketing_report\/by_advertising_program\/?$/i,   // отчет по рекламным акциям
+    comp_fin_rep_byunit: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i,      // отчет по подразделениями из отчетов
+    comp_unit_list: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,     // список юнитов. Работает и для списка юнитов чужой компании
+    comp_manage_salary: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/unit_list\/employee\/salary\/?$/i,     // управление зарплатой 
+
+    // для юнита
+    unit_any: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i,                    // внутри юнита. любая страница
+    unit_main: /\/[a-z]+\/main\/unit\/view\/\d+\/?$/i,                          // главная юнита
+    unit_ads: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/virtasement\/?$/i,   // реклама
+    unit_salary: /\/[a-z]+\/window\/unit\/employees\/engage\/\d+\/?$/ig,        // зарплата
+    unit_sale: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/sale\/?/i,          // продажа склад/завод
+    unit_supply: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/supply\/?/i,      // снабжение
+    unit_supply_create: /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i,      // заказ товара в маг, или склад. в общем стандартный заказ товара
+    unit_trade_hall: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/trading_hall\/?/i, // торговый зал
+    unit_retail_price_history: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i, // история продаж в магазине по товару
+    unit_education: /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i,   // обучение
+    unit_ware_resize: /\/[a-z]+\/window\/unit\/upgrade\/\d+\/?$/i,              // окно смена размера склада
+    unit_ware_change_spec: /\/[a-z]+\/window\/unit\/speciality_change\/\d+\/?$/i,   // смена спецухи склада
+    unit_finrep: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report(\/graphical)?$/i, // финанс отчет
+    unit_finrep_by_prod: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i, // финанс отчет по товарам
+};
 
 /**
  * По заданной ссылке и хтмл определяет находимся ли мы внутри юнита или нет.
@@ -712,7 +798,29 @@ function isUnit(urlPath?: string, $html?: JQuery, my: boolean = true) {
 
     // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
     // https://virtonomica.ru/olga/main/unit/view/6452212/*
-    let urlOk = url_unit_rx.test(urlPath);
+    let urlOk = Url_rx.unit_any.test(urlPath);
+    if (!urlOk)
+        return false;
+
+    // но у своего юнита есть слева в табах стрелочка со ссылью на компанию с тем же айди что и ссыль на дашборду. А для чужого нет ее и табов
+    let urlCompany = nullCheck($html.find("a[data-name='itour-tab-company-view'").attr("href"));
+    //let urlOffice = $html.find("div.officePlace a").attr("href");
+    let urlDash = nullCheck($html.find("a.dashboard").attr("href"));
+    if (urlCompany.length === 0 || urlDash.length === 0)
+        throw new Error("Ссылка на юзерлист или дашборду не может быть найдена");
+
+    let isMy = (`${urlCompany}/dashboard` === urlDash);
+    return my ? isMy : !isMy;
+}
+function isUnitOld(urlPath?: string, $html?: JQuery, my: boolean = true) {
+    if (!urlPath || !$html) {
+        urlPath = document.location.pathname;
+        $html = $(document);
+    }
+
+    // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
+    // https://virtonomica.ru/olga/main/unit/view/6452212/*
+    let urlOk = Url_rx.unit_any.test(urlPath);
     if (!urlOk)
         return false;
 
@@ -733,12 +841,12 @@ function isUnit(urlPath?: string, $html?: JQuery, my: boolean = true) {
 function isMyUnitList(): boolean {
 
     // для своих и чужих компани ссылка одна, поэтому проверяется и id
-    if (url_unit_list_rx.test(document.location.pathname) === false)
+    if (Url_rx.comp_unit_list.test(document.location.pathname) === false)
         return false;
 
     // запрос id может вернуть ошибку если мы на window ссылке. значит точно у чужого васи
     try {
-        let id = getCompanyId();
+        let id = nullCheck(parseCompanyId(document));
         let urlId = extractIntPositive(document.location.pathname) as number[]; // полюбому число есть иначе регекс не пройдет
         if (urlId[0] != id)
             return false;
@@ -757,12 +865,12 @@ function isMyUnitList(): boolean {
 function isOthersUnitList(): boolean {
 
     // для своих и чужих компани ссылка одна, поэтому проверяется и id
-    if (url_unit_list_rx.test(document.location.pathname) === false)
+    if (Url_rx.comp_unit_list.test(document.location.pathname) === false)
         return false;
 
     try {
         // для чужого списка будет разный айди в дашборде и в ссылке
-        let id = getCompanyId();
+        let id = nullCheck(parseCompanyId(document));
         let urlId = extractIntPositive(document.location.pathname) as number[]; // полюбому число есть иначе регекс не пройдет
         if (urlId[0] === id)
             return false;
@@ -775,7 +883,7 @@ function isOthersUnitList(): boolean {
 }
 
 function isUnitMain(urlPath: string, html: HTMLDocument, my: boolean = true): boolean {
-    let ok = url_unit_main_rx.test(urlPath);
+    let ok = Url_rx.unit_main.test(urlPath);
     if (!ok)
         return false;
     
@@ -797,11 +905,11 @@ function isUnitMain(urlPath: string, html: HTMLDocument, my: boolean = true): bo
 //}
 
 function isUnitFinanceReport(): boolean {
-    return url_unit_finance_report.test(document.location.pathname);
+    return Url_rx.unit_finrep.test(document.location.pathname);
 }
 
 function isCompanyRepByUnit(): boolean {
-    return url_rep_finance_byunit.test(document.location.pathname);
+    return Url_rx.comp_fin_rep_byunit.test(document.location.pathname);
 }
 
 /**
@@ -1296,6 +1404,28 @@ function getRepageUrl($html: JQuery, pages: number = 10000): string | null {
     return $pager.find('a').attr('href').replace(num, pages.toString());
 }
 
+/**
+ * Производит обрезку словаря (где ключи это строковые даты) до нужного числа ключей. Если ключи НЕ даты то даст ошибку.
+   Если обрезать нечего то ничего не делает.
+ * @param dict словарь который БУДЕТ изменен и удалены лишние самые старые элементы. shortDate: T
+ * @param maxItems максимальное число самых последних дат которые оставить
+ */
+function trimDateDict<T>(dict: IDictionary<T>, maxItems: number) {
+
+    // удалим лишние оставив maxItems дней истории
+    if (Object.keys(dict).length <= maxItems)
+        return;
+
+    let delDates = Object.keys(dict)
+        .map(v => dateFromShort(v))
+        .sort((a, b) => b.getDate() - a.getTime())
+        .map(v => dateToShort(v))
+        .slice(maxItems);
+
+    for (let d of delDates)
+        delete dict[d];
+}
+
 
 // SAVE & LOAD ------------------------------------
 
@@ -1325,6 +1455,32 @@ function buildStoreKey(realm: string | null, code: string, subid?: number): stri
     res += "_" + code;
 
     return res;
+}
+
+/**
+ * Заданный стандартный ключик хранилища разбивает на компоненты. Конечно учитывает что некоторые элементы
+   могут отсутствовать. например нет subid или даже реалма. В общем разбивка согласуется с билдером ключей
+ * @param key
+ */
+function splitStoreKey(key: string): [string | null, number | null, string] {
+    if (key.length <= 0)
+        throw new Error("Длина ключа должны быть больше 0");
+
+    // допустимые варианты ключей исходя из билдера ключей
+    // ^*_rm
+    // ^*_olga_rm
+    // ^*_olga_1234_rm
+    let rx = /^\^\*_(?:([a-z]+)_){0,1}(?:(\d+)_){0,1}([a-z]+){1}$/i;
+    let res = rx.exec(key);
+    if (res == null)
+        throw new Error(`Строка ${key} не является допустимым ключем хранилища.`);
+
+    // так как часть групп может отсутствовать то в выходном массиве в этих местах будет undefined
+    let realm = res[1] == null ? null : res[1].trim();
+    let subid = res[2] == null ? null : parseInt(res[2]);
+    let code = res[3].trim();
+
+    return [realm, subid, code];
 }
 
 /**

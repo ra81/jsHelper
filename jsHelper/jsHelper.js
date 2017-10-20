@@ -508,13 +508,40 @@ function sayMoney(num, symbol = "$") {
     return result;
 }
 /**
+ * Пробует взять со страницы тип юнита
+ * Сейчас эта хня берется из классов вида
+   <div class="picture bg-page-unit-header-kindergarten"></div>
+ * Он кореллирует четко с i-kindergarten в списке юнитов
+ * Если картинки на странице нет, то вернет null. Сам разбирайся почему ее там нет
+   Может выдать ошибку если тип не был найден в списке типов
+ * @param $html
+ */
+//function getUnitType($html: JQuery): UnitTypes | null {
+//    let $div = $html.find("div.picture");
+//    if ($div.length !== 1)
+//        return null;
+//    let typeStr = "";
+//    let classList = $div.attr("class").split(/\s+/);
+//    for (let cl of classList) {
+//        if (cl.startsWith("bg-page-unit-header-") == false)
+//            continue;
+//        // вырезаем тупо "bg-page-unit-header-"
+//        typeStr = cl.slice(20);
+//    }
+//    // некоторый онанизм с конверсией но никак иначе
+//    let type: UnitTypes = (UnitTypes as any)[typeStr] ? (UnitTypes as any)[typeStr] : UnitTypes.unknown;
+//    if (type == UnitTypes.unknown)
+//        throw new Error("Не описан тип юнита " + typeStr);
+//    return type;
+//}
+/**
  * Пробует взять со страницы картинку юнита и спарсить тип юнита
  * Пример сорса /img/v2/units/shop_1.gif  будет тип shop.
  * Он кореллирует четко с i-shop в списке юнитов
  * Если картинки на странице нет, то вернет null. Сам разбирайся почему ее там нет
  * @param $html
  */
-function getUnitType($html) {
+function getUnitTypeOld($html) {
     let $div = $html.find("#unitImage");
     if ($div.length === 0)
         return null;
@@ -542,25 +569,35 @@ function formatStr(str, ...args) {
     });
     return res;
 }
+/**
+ * если значение null то вывалит ошибку, иначе вернет само значение. Короткий метод для проверок на нулл
+ * @param val
+ */
+function nullCheck(val) {
+    if (val == null)
+        throw new Error(`nullCheck Error`);
+    return val;
+}
 // РЕГУЛЯРКИ ДЛЯ ССЫЛОК ------------------------------------
 // для 1 юнита
 // 
 let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i; // внутри юнита. любая страница
-let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i; // главная юнита
-let url_unit_finance_report = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
+//let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i;     // главная юнита
+let url_unit_finrep_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
+let url_unit_finrep_by_prod_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i; // финанс отчет по товарам
 let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i; // торговый зал
 let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
 let url_supply_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i; // снабжение
-let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale\/?/i; // продажа склад/завод
-let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i; // реклама
+//let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale\/?/i;        // продажа склад/завод
+//let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
 let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
 let url_supply_create_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i; // заказ товара в маг, или склад. в общем стандартный заказ товара
 let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i; // заказ оборудования на завод, лабу или куда то еще
 // для компании
 // 
-let url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i; // список юнитов. Работает и для списка юнитов чужой компании
+//let url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i;     // список юнитов. Работает и для списка юнитов чужой компании
 let url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i; // отчет по подразделениями из отчетов
-let url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i; // отчет по рекламным акциям
+//let url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i;  // отчет по рекламным акциям
 let url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i; // в окне управления юнитами групповой ремонт или закупка оборудования
 let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i; // управление - персонал
 // для для виртономики
@@ -572,6 +609,17 @@ let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/market
 let url_products_size_rx = /\/[a-z]+\/main\/industry\/unit_type\/info\/2011\/volume\/?/i; // размеры продуктов на склада
 let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i; // таможенные пошлины и ИЦ
 let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i; // брендовые товары список
+let Url_rx = {
+    // для компании в целом
+    top_manager: /\/[a-z]+\/(?:main|window)\/user\/privat\/persondata\/knowledge\/?$/ig,
+    comp_ads_rep: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/marketing_report\/by_advertising_program\/?$/i,
+    comp_unit_list: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,
+    // для юнита
+    unit_main: /\/[a-z]+\/main\/unit\/view\/\d+\/?$/i,
+    unit_ads: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/virtasement\/?$/i,
+    unit_salary: /\/[a-z]+\/window\/unit\/employees\/engage\/\d+\/?$/ig,
+    unit_sale: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/sale\/?/i,
+};
 /**
  * По заданной ссылке и хтмл определяет находимся ли мы внутри юнита или нет.
  * Если на задавать ссылку и хтмл то берет текущий документ.
@@ -581,6 +629,25 @@ let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i; // брендо�
  * @param my своя компания или нет?
  */
 function isUnit(urlPath, $html, my = true) {
+    if (!urlPath || !$html) {
+        urlPath = document.location.pathname;
+        $html = $(document);
+    }
+    // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
+    // https://virtonomica.ru/olga/main/unit/view/6452212/*
+    let urlOk = url_unit_rx.test(urlPath);
+    if (!urlOk)
+        return false;
+    // но у своего юнита есть слева в табах стрелочка со ссылью на компанию с тем же айди что и ссыль на дашборду. А для чужого нет ее и табов
+    let urlCompany = nullCheck($html.find("a[data-name='itour-tab-company-view'").attr("href"));
+    //let urlOffice = $html.find("div.officePlace a").attr("href");
+    let urlDash = nullCheck($html.find("a.dashboard").attr("href"));
+    if (urlCompany.length === 0 || urlDash.length === 0)
+        throw new Error("Ссылка на юзерлист или дашборду не может быть найдена");
+    let isMy = (`${urlCompany}/dashboard` === urlDash);
+    return my ? isMy : !isMy;
+}
+function isUnitOld(urlPath, $html, my = true) {
     if (!urlPath || !$html) {
         urlPath = document.location.pathname;
         $html = $(document);
@@ -604,7 +671,7 @@ function isUnit(urlPath, $html, my = true) {
  */
 function isMyUnitList() {
     // для своих и чужих компани ссылка одна, поэтому проверяется и id
-    if (url_unit_list_rx.test(document.location.pathname) === false)
+    if (Url_rx.comp_unit_list.test(document.location.pathname) === false)
         return false;
     // запрос id может вернуть ошибку если мы на window ссылке. значит точно у чужого васи
     try {
@@ -624,7 +691,7 @@ function isMyUnitList() {
  */
 function isOthersUnitList() {
     // для своих и чужих компани ссылка одна, поэтому проверяется и id
-    if (url_unit_list_rx.test(document.location.pathname) === false)
+    if (Url_rx.comp_unit_list.test(document.location.pathname) === false)
         return false;
     try {
         // для чужого списка будет разный айди в дашборде и в ссылке
@@ -640,7 +707,7 @@ function isOthersUnitList() {
     return true;
 }
 function isUnitMain(urlPath, html, my = true) {
-    let ok = url_unit_main_rx.test(urlPath);
+    let ok = Url_rx.unit_main.test(urlPath);
     if (!ok)
         return false;
     let hasTabs = $(html).find("ul.tabu").length > 0;
@@ -657,7 +724,7 @@ function isUnitMain(urlPath, html, my = true) {
 //    return ok;
 //}
 function isUnitFinanceReport() {
-    return url_unit_finance_report.test(document.location.pathname);
+    return url_unit_finrep_rx.test(document.location.pathname);
 }
 function isCompanyRepByUnit() {
     return url_rep_finance_byunit.test(document.location.pathname);
@@ -1065,6 +1132,24 @@ function getRepageUrl($html, pages = 10000) {
     let num = $pager.text().trim();
     return $pager.find('a').attr('href').replace(num, pages.toString());
 }
+/**
+ * Производит обрезку словаря (где ключи это строковые даты) до нужного числа ключей. Если ключи НЕ даты то даст ошибку.
+   Если обрезать нечего то ничего не делает.
+ * @param dict словарь который БУДЕТ изменен и удалены лишние самые старые элементы. shortDate: T
+ * @param maxItems максимальное число самых последних дат которые оставить
+ */
+function trimDateDict(dict, maxItems) {
+    // удалим лишние оставив maxItems дней истории
+    if (Object.keys(dict).length <= maxItems)
+        return;
+    let delDates = Object.keys(dict)
+        .map(v => dateFromShort(v))
+        .sort((a, b) => b.getDate() - a.getTime())
+        .map(v => dateToShort(v))
+        .slice(maxItems);
+    for (let d of delDates)
+        delete dict[d];
+}
 // SAVE & LOAD ------------------------------------
 /**
  * По заданным параметрам создает уникальный ключик использую уникальный одинаковый по всем скриптам префикс
@@ -1086,6 +1171,28 @@ function buildStoreKey(realm, code, subid) {
         res += "_" + subid;
     res += "_" + code;
     return res;
+}
+/**
+ * Заданный стандартный ключик хранилища разбивает на компоненты. Конечно учитывает что некоторые элементы
+   могут отсутствовать. например нет subid или даже реалма. В общем разбивка согласуется с билдером ключей
+ * @param key
+ */
+function splitStoreKey(key) {
+    if (key.length <= 0)
+        throw new Error("Длина ключа должны быть больше 0");
+    // допустимые варианты ключей исходя из билдера ключей
+    // ^*_rm
+    // ^*_olga_rm
+    // ^*_olga_1234_rm
+    let rx = /^\^\*_(?:([a-z]+)_){0,1}(?:(\d+)_){0,1}([a-z]+){1}$/i;
+    let res = rx.exec(key);
+    if (res == null)
+        throw new Error(`Строка ${key} не является допустимым ключем хранилища.`);
+    // так как часть групп может отсутствовать то в выходном массиве в этих местах будет undefined
+    let realm = res[1] == null ? null : res[1].trim();
+    let subid = res[2] == null ? null : parseInt(res[2]);
+    let code = res[3].trim();
+    return [realm, subid, code];
 }
 /**
  * Возвращает все ключи ЮНИТОВ для заданного реалма и КОДА.
