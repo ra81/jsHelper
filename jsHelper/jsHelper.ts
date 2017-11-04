@@ -620,38 +620,6 @@ function sayMoney(num: number, symbol:string="$") {
 }
 
 /**
- * Пробует взять со страницы тип юнита
- * Сейчас эта хня берется из классов вида
-   <div class="picture bg-page-unit-header-kindergarten"></div>
- * Он кореллирует четко с i-kindergarten в списке юнитов
- * Если картинки на странице нет, то вернет null. Сам разбирайся почему ее там нет
-   Может выдать ошибку если тип не был найден в списке типов
- * @param $html
- */
-//function getUnitType($html: JQuery): UnitTypes | null {
-
-//    let $div = $html.find("div.picture");
-//    if ($div.length !== 1)
-//        return null;
-
-//    let typeStr = "";
-//    let classList = $div.attr("class").split(/\s+/);
-//    for (let cl of classList) {
-//        if (cl.startsWith("bg-page-unit-header-") == false)
-//            continue;
-
-//        // вырезаем тупо "bg-page-unit-header-"
-//        typeStr = cl.slice(20);
-//    }
-
-//    // некоторый онанизм с конверсией но никак иначе
-//    let type: UnitTypes = (UnitTypes as any)[typeStr] ? (UnitTypes as any)[typeStr] : UnitTypes.unknown;
-//    if (type == UnitTypes.unknown)
-//        throw new Error("Не описан тип юнита " + typeStr);
-
-//    return type;
-//}
-/**
  * Пробует взять со страницы картинку юнита и спарсить тип юнита
  * Пример сорса /img/v2/units/shop_1.gif  будет тип shop.
  * Он кореллирует четко с i-shop в списке юнитов
@@ -697,12 +665,20 @@ function formatStr(str: string, ...args: any[]): string {
  * если значение null то вывалит ошибку, иначе вернет само значение. Короткий метод для проверок на нулл
  * @param val
  */
-function nullCheck<T>(val: T | null) {
+function nullCheck<T>(val: T | null | undefined) {
 
     if (val == null)
         throw new Error(`nullCheck Error`);
 
     return val;
+}
+
+/**
+ * Спать потоку заданное число миллисекунд. Асинхронная!!
+ * @param ms
+ */
+function sleep_async(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // РЕГУЛЯРКИ ДЛЯ ССЫЛОК ------------------------------------
@@ -780,6 +756,9 @@ let Url_rx = {
     unit_ware_change_spec: /\/[a-z]+\/window\/unit\/speciality_change\/\d+\/?$/i,   // смена спецухи склада
     unit_finrep: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report(\/graphical)?$/i, // финанс отчет
     unit_finrep_by_prod: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i, // финанс отчет по товарам
+
+    // API
+    api_unit_sale_contracts: /api\/[a-z]+\/main\/unit\/sale\/contracts/i,     // список контрактов
 };
 
 /**
@@ -1217,6 +1196,74 @@ async function tryGet_async(url: string, retries: number = 10, timeout: number =
         }
     });
     
+    return $deffered.promise();
+}
+
+/**
+ * Аналогично обычному методу tryGet_async правда ожидает только json и конвертает по ходу дела числа в числа если они идут строкой
+ */
+async function tryGetJSON_async(url: string, retries: number = 10, timeout: number = 1000, beforeGet?: IAction1<string>, onError?: IAction1<string>): Promise<any> {
+    // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
+    let $deffered = $.Deferred<string>();
+
+    if (beforeGet) {
+        try {
+            beforeGet(url);
+        }
+        catch (err) {
+            logDebug("beforeGet вызвал исключение", err);
+        }
+    }
+
+    $.ajax({
+        url: url,
+        type: "GET",
+        cache: false,
+        dataType: "text",
+
+        success: (jsonStr, status, jqXHR) => {
+            let obj = JSON.parse(jsonStr, (k, v) => {
+                return (typeof v === "object" || isNaN(v)) ? v : parseFloat(v);
+            });
+
+            $deffered.resolve(obj);
+        },
+
+        error: function (this: JQueryAjaxSettings, jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
+
+            if (onError) {
+                try {
+                    onError(url);
+                }
+                catch (err) {
+                    logDebug("onError вызвал исключение", err);
+                }
+            }
+
+            retries--;
+            if (retries <= 0) {
+                let err = new Error(`can't get ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
+                $deffered.reject(err);
+                return;
+            }
+
+            //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+            let _this = this;
+            setTimeout(() => {
+                if (beforeGet) {
+                    try {
+                        beforeGet(url);
+                    }
+                    catch (err) {
+                        logDebug("beforeGet вызвал исключение", err);
+                    }
+                }
+
+                $.ajax(_this);
+            }, timeout);
+        }
+    });
+
     return $deffered.promise();
 }
 
