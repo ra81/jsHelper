@@ -9,6 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
+/*
+Есть классы юнитов (unit_class или kind), они обладают общими свойствами и в целом интерфейсом. Отличаються могут оборудованием.
+Легкие сервисы включают прачечные парикмахерские и так далее. Это типы юнитов. unit_type
+В них есть специализации это уже produce_id
+
+Классы юнитов переключаются кнопками на главной странице.
+Типы юнитов можно выбирать уже из выпадающей менюшки возле кнопок.
+*/
 // список типов юнитов. берется по картинке в юните, или с класса i-farm, i-office в списках юнитов
 var UnitTypes;
 (function (UnitTypes) {
@@ -30,24 +38,55 @@ var UnitTypes;
     UnitTypes[UnitTypes["fishingbase"] = 15] = "fishingbase";
     UnitTypes[UnitTypes["service_light"] = 16] = "service_light";
     UnitTypes[UnitTypes["fitness"] = 17] = "fitness";
-    UnitTypes[UnitTypes["medicine"] = 18] = "medicine";
-    UnitTypes[UnitTypes["restaurant"] = 19] = "restaurant";
-    UnitTypes[UnitTypes["laundry"] = 20] = "laundry";
-    UnitTypes[UnitTypes["hairdressing"] = 21] = "hairdressing";
+    UnitTypes[UnitTypes["laundry"] = 18] = "laundry";
+    UnitTypes[UnitTypes["hairdressing"] = 19] = "hairdressing";
+    UnitTypes[UnitTypes["medicine"] = 20] = "medicine";
+    UnitTypes[UnitTypes["restaurant"] = 21] = "restaurant";
     UnitTypes[UnitTypes["power"] = 22] = "power";
     UnitTypes[UnitTypes["coal_power"] = 23] = "coal_power";
     UnitTypes[UnitTypes["incinerator_power"] = 24] = "incinerator_power";
     UnitTypes[UnitTypes["oil_power"] = 25] = "oil_power";
-    UnitTypes[UnitTypes["fuel"] = 26] = "fuel";
-    UnitTypes[UnitTypes["repair"] = 27] = "repair";
-    UnitTypes[UnitTypes["apiary"] = 28] = "apiary";
-    UnitTypes[UnitTypes["educational"] = 29] = "educational";
-    UnitTypes[UnitTypes["kindergarten"] = 30] = "kindergarten";
-    UnitTypes[UnitTypes["sun_power"] = 31] = "sun_power";
+    UnitTypes[UnitTypes["sun_power"] = 26] = "sun_power";
+    UnitTypes[UnitTypes["fuel"] = 27] = "fuel";
+    UnitTypes[UnitTypes["repair"] = 28] = "repair";
+    UnitTypes[UnitTypes["apiary"] = 29] = "apiary";
+    UnitTypes[UnitTypes["educational"] = 30] = "educational";
+    UnitTypes[UnitTypes["kindergarten"] = 31] = "kindergarten";
     UnitTypes[UnitTypes["network"] = 32] = "network";
     UnitTypes[UnitTypes["it"] = 33] = "it";
     UnitTypes[UnitTypes["cellular"] = 34] = "cellular";
 })(UnitTypes || (UnitTypes = {}));
+/*
+все классы юнитов которые есть. По факту это кнопки на странице списка юнитов. Каждая кнопка - отдельный класс
+забрать их можно со страницы https://virtonomica.ru/api/lien/main/unittype/browse
+*/
+var UnitClasses;
+(function (UnitClasses) {
+    UnitClasses[UnitClasses["unknown"] = -1] = "unknown";
+    UnitClasses[UnitClasses["villa"] = 100] = "villa";
+    UnitClasses[UnitClasses["workshop"] = 1814] = "workshop";
+    UnitClasses[UnitClasses["office"] = 1815] = "office";
+    UnitClasses[UnitClasses["mine"] = 1868] = "mine";
+    UnitClasses[UnitClasses["shop"] = 1885] = "shop";
+    UnitClasses[UnitClasses["warehouse"] = 2013] = "warehouse";
+    UnitClasses[UnitClasses["animalfarm"] = 2043] = "animalfarm";
+    UnitClasses[UnitClasses["mill"] = 2056] = "mill";
+    UnitClasses[UnitClasses["sawmill"] = 2070] = "sawmill";
+    UnitClasses[UnitClasses["farm"] = 2117] = "farm";
+    UnitClasses[UnitClasses["lab"] = 2202] = "lab";
+    UnitClasses[UnitClasses["orchard"] = 2377] = "orchard";
+    UnitClasses[UnitClasses["seaport"] = 3473] = "seaport";
+    UnitClasses[UnitClasses["fishingbase"] = 335145] = "fishingbase";
+    UnitClasses[UnitClasses["service_light"] = 348193] = "service_light";
+    UnitClasses[UnitClasses["medicine"] = 359822] = "medicine";
+    UnitClasses[UnitClasses["restaurant"] = 373182] = "restaurant";
+    UnitClasses[UnitClasses["power"] = 422107] = "power";
+    UnitClasses[UnitClasses["fuel"] = 422789] = "fuel";
+    UnitClasses[UnitClasses["repair"] = 422811] = "repair";
+    UnitClasses[UnitClasses["it"] = 423353] = "it";
+    UnitClasses[UnitClasses["educational"] = 423693] = "educational";
+    UnitClasses[UnitClasses["network"] = 423768] = "network";
+})(UnitClasses || (UnitClasses = {}));
 // уровни сервиса
 var ServiceLevels;
 (function (ServiceLevels) {
@@ -59,6 +98,62 @@ var ServiceLevels;
     ServiceLevels[ServiceLevels["higher"] = 4] = "higher";
     ServiceLevels[ServiceLevels["elite"] = 5] = "elite";
 })(ServiceLevels || (ServiceLevels = {}));
+function serviceFromStrOrError(str) {
+    switch (str.toLowerCase()) {
+        case "элитный":
+            return ServiceLevels.elite;
+        case "очень высокий":
+            return ServiceLevels.higher;
+        case "высокий":
+            return ServiceLevels.high;
+        case "нормальный":
+            return ServiceLevels.normal;
+        case "низкий":
+            return ServiceLevels.low;
+        case "очень низкий":
+            return ServiceLevels.lower;
+        case "не известен":
+            return ServiceLevels.none;
+        default:
+            throw new Error("Не смог идентифицировать указанный уровень сервиса " + str);
+    }
+}
+// индекс рынка
+var MarketIndex;
+(function (MarketIndex) {
+    MarketIndex[MarketIndex["None"] = -1] = "None";
+    MarketIndex[MarketIndex["E"] = 0] = "E";
+    MarketIndex[MarketIndex["D"] = 1] = "D";
+    MarketIndex[MarketIndex["C"] = 2] = "C";
+    MarketIndex[MarketIndex["B"] = 3] = "B";
+    MarketIndex[MarketIndex["A"] = 4] = "A";
+    MarketIndex[MarketIndex["AA"] = 5] = "AA";
+    MarketIndex[MarketIndex["AAA"] = 6] = "AAA";
+})(MarketIndex || (MarketIndex = {}));
+function mIndexFromString(str) {
+    let index = MarketIndex.None;
+    switch (str) {
+        case "AAA":
+            return MarketIndex.AAA;
+        case "AA":
+            return MarketIndex.AA;
+        case "A":
+            return MarketIndex.A;
+        case "B":
+            return MarketIndex.B;
+        case "C":
+            return MarketIndex.C;
+        case "D":
+            return MarketIndex.D;
+        case "E":
+            return MarketIndex.E;
+        case "?":
+        case "None":
+            return MarketIndex.None;
+        default:
+            throw new Error(`Неизвестный индекс рынка: ${str}`);
+    }
+}
 /**
  * Простенький конвертер, который из множества формирует массив значений множества. По факту массив чисел.
    используется внутреннее представление множеств и как бы может сломаться в будущем
@@ -86,6 +181,24 @@ class Counter {
     get Count() {
         return this._count;
     }
+}
+function dictKeysN(dict) {
+    return Object.keys(dict).map((v, i, arr) => parseInt(v));
+}
+function dictKeys(dict) {
+    return Object.keys(dict);
+}
+function dictValues(dict) {
+    let res = [];
+    for (let key in dict)
+        res.push(dict[key]);
+    return res;
+}
+function dictValuesN(dict) {
+    let res = [];
+    for (let key in dict)
+        res.push(dict[key]);
+    return res;
 }
 /**
  * Проверяет наличие в словаре ключей. Шорт алиас для удобства.
@@ -293,11 +406,17 @@ function getRealmOrError() {
     return realm;
 }
 /**
- * Парсит id компании со страницы и выдает ошибку если не может спарсить
+ * Парсит id компании со страницы. Если не получилось то вернет null
  */
-function getCompanyId() {
-    let str = matchedOrError($("a.dashboard").attr("href"), /\d+/);
-    return numberfyOrError(str);
+function parseCompanyId(html) {
+    let $html = $(html);
+    let href = $html.find("a.dashboard").attr("href");
+    if (href == null || href.length <= 0)
+        return null;
+    let arr = href.match(/\d+/);
+    if (arr == null || arr.length !== 1)
+        return null;
+    return numberfyOrError(arr[0]);
 }
 /**
  * Оцифровывает строку. Возвращает всегда либо число или Number.POSITIVE_INFINITY либо -1 если str не содержит числа.
@@ -508,33 +627,6 @@ function sayMoney(num, symbol = "$") {
     return result;
 }
 /**
- * Пробует взять со страницы тип юнита
- * Сейчас эта хня берется из классов вида
-   <div class="picture bg-page-unit-header-kindergarten"></div>
- * Он кореллирует четко с i-kindergarten в списке юнитов
- * Если картинки на странице нет, то вернет null. Сам разбирайся почему ее там нет
-   Может выдать ошибку если тип не был найден в списке типов
- * @param $html
- */
-//function getUnitType($html: JQuery): UnitTypes | null {
-//    let $div = $html.find("div.picture");
-//    if ($div.length !== 1)
-//        return null;
-//    let typeStr = "";
-//    let classList = $div.attr("class").split(/\s+/);
-//    for (let cl of classList) {
-//        if (cl.startsWith("bg-page-unit-header-") == false)
-//            continue;
-//        // вырезаем тупо "bg-page-unit-header-"
-//        typeStr = cl.slice(20);
-//    }
-//    // некоторый онанизм с конверсией но никак иначе
-//    let type: UnitTypes = (UnitTypes as any)[typeStr] ? (UnitTypes as any)[typeStr] : UnitTypes.unknown;
-//    if (type == UnitTypes.unknown)
-//        throw new Error("Не описан тип юнита " + typeStr);
-//    return type;
-//}
-/**
  * Пробует взять со страницы картинку юнита и спарсить тип юнита
  * Пример сорса /img/v2/units/shop_1.gif  будет тип shop.
  * Он кореллирует четко с i-shop в списке юнитов
@@ -570,7 +662,8 @@ function formatStr(str, ...args) {
     return res;
 }
 /**
- * если значение null то вывалит ошибку, иначе вернет само значение. Короткий метод для проверок на нулл
+ * Если значение null|undefined то вывалит ошибку, иначе вернет само значение.
+   Короткий метод для проверок на нулл
  * @param val
  */
 function nullCheck(val) {
@@ -578,47 +671,127 @@ function nullCheck(val) {
         throw new Error(`nullCheck Error`);
     return val;
 }
+function numberCheck(value) {
+    if (typeof (value) != "number")
+        throw new Error(`${value} не является числом.`);
+    return value;
+}
+function stringCheck(value) {
+    if (typeof (value) != "string")
+        throw new Error(`${value} не является строкой.`);
+    return value;
+}
+/**
+ * Спать потоку заданное число миллисекунд. Асинхронная!!
+ * @param ms
+ */
+function sleep_async(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 // РЕГУЛЯРКИ ДЛЯ ССЫЛОК ------------------------------------
 // для 1 юнита
 // 
-let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i; // внутри юнита. любая страница
+//let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i;           // внутри юнита. любая страница
 //let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i;     // главная юнита
-let url_unit_finrep_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
-let url_unit_finrep_by_prod_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i; // финанс отчет по товарам
-let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i; // торговый зал
-let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
-let url_supply_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i; // снабжение
+//let url_unit_finrep_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
+//let url_unit_finrep_by_prod_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i; // финанс отчет по товарам
+//let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i;    // торговый зал
+//let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
+//let url_supply_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
 //let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale\/?/i;        // продажа склад/завод
 //let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
-let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
-let url_supply_create_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i; // заказ товара в маг, или склад. в общем стандартный заказ товара
-let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i; // заказ оборудования на завод, лабу или куда то еще
+//let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
+//let url_supply_create_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
+//let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i;   // заказ оборудования на завод, лабу или куда то еще
 // для компании
 // 
 //let url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i;     // список юнитов. Работает и для списка юнитов чужой компании
-let url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i; // отчет по подразделениями из отчетов
+//let url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i;  // отчет по подразделениями из отчетов
 //let url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i;  // отчет по рекламным акциям
-let url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i; // в окне управления юнитами групповой ремонт или закупка оборудования
-let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i; // управление - персонал
+//let url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i;     // в окне управления юнитами групповой ремонт или закупка оборудования
+//let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i;     // управление - персонал
 // для для виртономики
 // 
-let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
-let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i; // страница со всеми товарами игры
-let url_trade_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/trading$/i; // страница с торгуемыми товарами
-let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
-let url_products_size_rx = /\/[a-z]+\/main\/industry\/unit_type\/info\/2011\/volume\/?/i; // размеры продуктов на склада
-let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i; // таможенные пошлины и ИЦ
-let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i; // брендовые товары список
+//let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
+//let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i;   // страница со всеми товарами игры
+//let url_trade_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/trading$/i;   // страница с торгуемыми товарами
+//let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
+//let url_products_size_rx = /\/[a-z]+\/main\/industry\/unit_type\/info\/2011\/volume\/?/i;  // размеры продуктов на склада
+//let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i;    // таможенные пошлины и ИЦ
+// let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i;    // брендовые товары список
 let Url_rx = {
+    // для виртономики
+    v_city_retail_report: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
+    v_tm_info: /\/[a-z]+\/(?:main|window)\/globalreport\/tm\/info\/?$/i,
+    v_country_duties: /\/[a-z]+\/(?:main|window)\/geo\/countrydutylist\/\d+\/?/i,
+    v_regions: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/region\/?$/i,
+    v_countries: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/country\/?$/i,
+    v_cities: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/city\/?$/i,
+    v_products_size: /\/[a-z]+\/(?:main|window)\/industry\/unit_type\/info\/2011\/volume\/?/i,
+    v_media_rep_spec: /\/[a-z]+\/(?:main|window)\/mediareport\/\d+/i,
+    v_global_products: /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i,
+    v_products: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/products$/i,
+    v_trade_products: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/trading$/i,
+    v_energy_price: /\/[a-z]+\/(?:main|window)\/geo\/tariff\/\d+/i,
+    v_product_suppliers: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i,
     // для компании в целом
     top_manager: /\/[a-z]+\/(?:main|window)\/user\/privat\/persondata\/knowledge\/?$/ig,
     comp_ads_rep: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/marketing_report\/by_advertising_program\/?$/i,
+    comp_fin_rep_byunit: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i,
     comp_unit_list: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,
+    comp_manage_salary: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/unit_list\/employee\/salary\/?$/i,
     // для юнита
+    unit_any: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i,
     unit_main: /\/[a-z]+\/main\/unit\/view\/\d+\/?$/i,
     unit_ads: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/virtasement\/?$/i,
     unit_salary: /\/[a-z]+\/window\/unit\/employees\/engage\/\d+\/?$/ig,
     unit_sale: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/sale\/?/i,
+    unit_supply: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/supply\/?/i,
+    unit_supply_create: /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i,
+    unit_trade_hall: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/trading_hall\/?/i,
+    unit_retail_price_history: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i,
+    unit_education: /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i,
+    unit_ware_resize: /\/[a-z]+\/window\/unit\/upgrade\/\d+\/?$/i,
+    unit_ware_change_spec: /\/[a-z]+\/window\/unit\/speciality_change\/\d+\/?$/i,
+    unit_finrep: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report(\/graphical)?$/i,
+    unit_finrep_by_prod: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i,
+    unit_equipment: /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/ig,
+};
+let UrlApi_rx = {
+    // для виртономики
+    trade_products: /api\/[a-z]+\/main\/product\/goods$/i,
+    cities: /api\/[a-z]+\/main\/geo\/city\/browse$/i,
+    regions: /api\/[a-z]+\/main\/geo\/region\/browse$/i,
+    retail_products: /api\/[a-z]+\/main\/product\/goods$/i,
+    // для юнита
+    unit_summary: /api\/[a-z]+\/main\/unit\/summary$/i,
+    unit_sale_contracts: /api\/[a-z]+\/main\/unit\/sale\/contracts$/i,
+    unit_supply_contracts: /api\/[a-z]+\/main\/unit\/supply\/contracts$/i,
+    // для компании в целом
+    comp_unit_list: /api\/[a-z]+\/main\/company\/units$/i,
+};
+let Url_tpl = {
+    // компания в целом
+    comp_unit_list: `/{0}/window/company/view/{1}/unit_list`,
+    // юнит
+    ajax_deleteContract: `/{0}/ajax/unit/supply/delete`,
+    ajax_createContract: `/{0}/ajax/unit/supply/create`,
+    // глобальные виртовские
+    v_glob_suppliers: `/{0}/main/globalreport/marketing/by_products/{1}/`,
+    // пагинаторы
+    setPaging_marketingProd: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/20000`,
+};
+let UrlApi_tpl = {
+    // компания в целом main/company/units?id=3948072&pagesize=20000
+    comp_unit_list: `/api/{0}/main/company/units?id={1}&pagesize={2}`,
+    // юнит
+    unit_saleContracts: `/api/{0}/main/unit/sale/contracts?id={1}`,
+    unit_supply_contracts: `/api/{0}/main/unit/supply/contracts?id={1}`,
+    // глобальные виртовские
+    tradeGoods: `/api/{0}/main/product/goods`,
+    cities: `/api/{0}/main/geo/city/browse`,
+    regions: `/api/{0}/main/geo/region/browse`,
+    retail_products: `/api/{0}/main/product/goods`,
 };
 /**
  * По заданной ссылке и хтмл определяет находимся ли мы внутри юнита или нет.
@@ -635,7 +808,7 @@ function isUnit(urlPath, $html, my = true) {
     }
     // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
     // https://virtonomica.ru/olga/main/unit/view/6452212/*
-    let urlOk = url_unit_rx.test(urlPath);
+    let urlOk = Url_rx.unit_any.test(urlPath);
     if (!urlOk)
         return false;
     // но у своего юнита есть слева в табах стрелочка со ссылью на компанию с тем же айди что и ссыль на дашборду. А для чужого нет ее и табов
@@ -654,7 +827,7 @@ function isUnitOld(urlPath, $html, my = true) {
     }
     // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
     // https://virtonomica.ru/olga/main/unit/view/6452212/*
-    let urlOk = url_unit_rx.test(urlPath);
+    let urlOk = Url_rx.unit_any.test(urlPath);
     if (!urlOk)
         return false;
     // но у своего юнита ссыль на офис имеет тот же айди что и ссыль на дашборду. А для чужого нет
@@ -675,7 +848,7 @@ function isMyUnitList() {
         return false;
     // запрос id может вернуть ошибку если мы на window ссылке. значит точно у чужого васи
     try {
-        let id = getCompanyId();
+        let id = nullCheck(parseCompanyId(document));
         let urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
         if (urlId[0] != id)
             return false;
@@ -695,7 +868,7 @@ function isOthersUnitList() {
         return false;
     try {
         // для чужого списка будет разный айди в дашборде и в ссылке
-        let id = getCompanyId();
+        let id = nullCheck(parseCompanyId(document));
         let urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
         if (urlId[0] === id)
             return false;
@@ -724,43 +897,10 @@ function isUnitMain(urlPath, html, my = true) {
 //    return ok;
 //}
 function isUnitFinanceReport() {
-    return url_unit_finrep_rx.test(document.location.pathname);
+    return Url_rx.unit_finrep.test(document.location.pathname);
 }
 function isCompanyRepByUnit() {
-    return url_rep_finance_byunit.test(document.location.pathname);
-}
-/**
- * Возвращает Истину если данная страница есть страница в магазине своем или чужом. Иначе Ложь
- * @param html полностью страница
- * @param my свой юнит или чужой
- */
-function isShop(html, my = true) {
-    let $html = $(html);
-    // нет разницы наш или чужой юнит везде картинка мага нужна. ее нет только если window
-    let $img = $html.find("#unitImage img[src*='/shop_']");
-    if ($img.length > 1)
-        throw new Error(`Найдено несколько (${$img.length}) картинок Магазина.`);
-    return $img.length > 0;
-}
-function isWarehouse($html) {
-    // нет разницы наш или чужой юнит везде картинка мага нужна. ее нет только если window
-    let $img = $html.find("#unitImage img[src*='/warehouse_']");
-    if ($img.length > 1)
-        throw new Error(`Найдено несколько (${$img.length}) картинок Склада.`);
-    return $img.length > 0;
-}
-/**
- * Возвращает Истину если данная страница есть страница в заправке своей или чужой. Иначе Ложь
- * @param html полностью страница
- * @param my свой юнит или чужой
- */
-function isFuel(html, my = true) {
-    let $html = $(html);
-    // нет разницы наш или чужой юнит везде картинка мага нужна
-    let $img = $html.find("#unitImage img[src*='/fuel_']");
-    if ($img.length > 1)
-        throw new Error(`Найдено несколько (${$img.length}) картинок Магазина.`);
-    return $img.length > 0;
+    return Url_rx.comp_fin_rep_byunit.test(document.location.pathname);
 }
 function hasTradeHall(html, my = true) {
     let $html = $(html);
@@ -981,7 +1121,80 @@ function tryGet_async(url, retries = 10, timeout = 1000, beforeGet, onError) {
     });
 }
 /**
- * Отправляет данные на сервер запросом POST. В остальном работает как и гет. Так же вернет промис который ресолвит с возвращенными данными
+ * Берет строку JSON и конвертает поля в данные. Числа в числа, null в нулл, и t/f в true/false
+ * @param jsonStr
+ */
+function parseJSON(jsonStr) {
+    let obj = JSON.parse(jsonStr, (k, v) => {
+        if (v === "t")
+            return true;
+        if (v === "f")
+            return false;
+        return (typeof v === "object" || isNaN(v)) ? v : parseFloat(v);
+    });
+    return obj;
+}
+/**
+ * Аналогично обычному методу tryGet_async правда ожидает только json и конвертает по ходу дела числа в числа если они идут строкой
+ */
+function tryGetJSON_async(url, retries = 10, timeout = 1000, beforeGet, onError) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
+        let $deffered = $.Deferred();
+        if (beforeGet) {
+            try {
+                beforeGet(url);
+            }
+            catch (err) {
+                logDebug("beforeGet вызвал исключение", err);
+            }
+        }
+        $.ajax({
+            url: url,
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: (jsonStr, status, jqXHR) => {
+                let obj = parseJSON(jsonStr);
+                $deffered.resolve(obj);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (onError) {
+                    try {
+                        onError(url);
+                    }
+                    catch (err) {
+                        logDebug("onError вызвал исключение", err);
+                    }
+                }
+                retries--;
+                if (retries <= 0) {
+                    let err = new Error(`can't get ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
+                    $deffered.reject(err);
+                    return;
+                }
+                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                let _this = this;
+                setTimeout(() => {
+                    if (beforeGet) {
+                        try {
+                            beforeGet(url);
+                        }
+                        catch (err) {
+                            logDebug("beforeGet вызвал исключение", err);
+                        }
+                    }
+                    $.ajax(_this);
+                }, timeout);
+            }
+        });
+        return $deffered.promise();
+    });
+}
+/**
+ * Отправляет данные на сервер запросом POST. В остальном работает как и гет.
+   Так же вернет промис который ресолвит с возвращенными данными
+   Ожидает назад любые данные, автоматом определит. Для JSON лучше юзать метод tryPostJSON_async где четко указано что ждать
  * @param url
  * @param form данные для отправки на сервер
  * @param retries
@@ -1039,7 +1252,9 @@ function tryPost_async(url, form, retries = 10, timeout = 1000, beforePost, onEr
     });
 }
 /**
- * Отправляет данные на сервер запросом POST. В остальном работает как и гет. Так же вернет промис который ресолвит с возвращенными данными
+ * Отправляет данные на сервер запросом POST. В остальном работает как и гет.
+   Так же вернет промис который ресолвит с возвращенными данными
+   Ожидает назад JSON данные
  * @param url
  * @param data данные для отправки на сервер
  * @param retries

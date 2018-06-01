@@ -3,6 +3,15 @@
 // Набор вспомогательных функций для использования в других проектах. Универсальные
 //   /// <reference path= "../../_jsHelper/jsHelper/jsHelper.ts" />
 
+/*
+Есть классы юнитов (unit_class или kind), они обладают общими свойствами и в целом интерфейсом. Отличаються могут оборудованием.
+Легкие сервисы включают прачечные парикмахерские и так далее. Это типы юнитов. unit_type
+В них есть специализации это уже produce_id
+
+Классы юнитов переключаются кнопками на главной странице.
+Типы юнитов можно выбирать уже из выпадающей менюшки возле кнопок.
+*/
+
 // список типов юнитов. берется по картинке в юните, или с класса i-farm, i-office в списках юнитов
 enum UnitTypes {
     unknown = 0, // для неописанных еще в коде юнитов
@@ -21,29 +30,119 @@ enum UnitTypes {
     workshop,
     villa,
     fishingbase,
-    service_light,
-    fitness,
+    service_light, fitness, laundry, hairdressing,
     medicine,
     restaurant,
-    laundry,
-    hairdressing,
-    power,
-    coal_power,
-    incinerator_power,
-    oil_power,
+    power, coal_power, incinerator_power, oil_power, sun_power,
     fuel,
     repair,
     apiary,
     educational, kindergarten,  // картинка внутри юнита для образовательных и в списке
-    sun_power,
-    network,
-    it, cellular, // в юните и в списке
+    network, it, cellular,      // в юните и в списке
 }
+
+/*
+все классы юнитов которые есть. По факту это кнопки на странице списка юнитов. Каждая кнопка - отдельный класс
+забрать их можно со страницы https://virtonomica.ru/api/lien/main/unittype/browse
+*/
+enum UnitClasses {
+    unknown         = -1,       // для неописанных еще в коде юнитов
+    villa           = 100,
+    workshop        = 1814,
+    office          = 1815,
+    mine            = 1868,
+    shop            = 1885,
+    warehouse       = 2013,
+    animalfarm      = 2043, 
+    mill            = 2056,     
+    sawmill         = 2070,     // лесопилка. госы
+    farm            = 2117,     // земля. госы
+    lab             = 2202,
+    orchard         = 2377,     // плантации. госы
+    seaport         = 3473,
+    fishingbase     = 335145,
+    service_light   = 348193,   // сервисы типо парикмахерских
+    medicine        = 359822,
+    restaurant      = 373182,
+    power           = 422107,
+    fuel            = 422789,   // заправки
+    repair          = 422811,   // автосервисы
+    it              = 423353,
+    educational     = 423693,
+    network         = 423768
+}
+
 
 // уровни сервиса
 enum ServiceLevels{
     none= -1, lower = 0, low, normal, high, higher, elite
 }
+function serviceFromStrOrError(str: string): ServiceLevels {
+
+    switch (str.toLowerCase()) {
+        case "элитный":
+            return ServiceLevels.elite;
+
+        case "очень высокий":
+            return ServiceLevels.higher;
+
+        case "высокий":
+            return ServiceLevels.high;
+
+        case "нормальный":
+            return ServiceLevels.normal;
+
+        case "низкий":
+            return ServiceLevels.low;
+
+        case "очень низкий":
+            return ServiceLevels.lower;
+
+        case "не известен":
+            return ServiceLevels.none;
+
+        default:
+            throw new Error("Не смог идентифицировать указанный уровень сервиса " + str);
+    }
+}
+
+// индекс рынка
+enum MarketIndex {
+    None = -1, E, D, C, B, A, AA, AAA
+}
+function mIndexFromString(str: string): MarketIndex {
+    let index = MarketIndex.None;
+    switch (str) {
+        case "AAA":
+            return MarketIndex.AAA;
+
+        case "AA":
+            return MarketIndex.AA;
+
+        case "A":
+            return MarketIndex.A;
+
+        case "B":
+            return MarketIndex.B;
+
+        case "C":
+            return MarketIndex.C;
+
+        case "D":
+            return MarketIndex.D;
+
+        case "E":
+            return MarketIndex.E;
+
+        case "?":
+        case "None":
+            return MarketIndex.None;
+
+        default:
+            throw new Error(`Неизвестный индекс рынка: ${str}`);
+    }
+}
+
 
 /**
  * Простенький конвертер, который из множества формирует массив значений множества. По факту массив чисел.
@@ -89,6 +188,27 @@ interface IDictionaryN<T> {
     [key: number]: T;
 }
 
+
+function dictKeysN(dict: IDictionaryN<any>): number[] {
+    return Object.keys(dict).map((v, i, arr) => parseInt(v));
+}
+function dictKeys(dict: IDictionary<any>): string[] {
+    return Object.keys(dict);
+}
+function dictValues<T>(dict: IDictionary<T>): T[] {
+    let res: T[] = [];
+    for (let key in dict)
+        res.push(dict[key]);
+
+    return res;
+}
+function dictValuesN<T>(dict: IDictionaryN<T>): T[] {
+    let res: T[] = [];
+    for (let key in dict)
+        res.push(dict[key]);
+
+    return res;
+}
 
 /**
  * Проверяет наличие в словаре ключей. Шорт алиас для удобства.
@@ -416,7 +536,7 @@ function numberfyOrError(str: string, minVal: number = 0, infinity: boolean = fa
     if (!infinity && (n === Number.POSITIVE_INFINITY || n === Number.NEGATIVE_INFINITY))
         throw new RangeError("Получили бесконечность, что запрещено.");
 
-    if (n <= minVal)
+    if (n <= minVal) // TODO: как то блять неудобно что мин граница не разрешается. удобнее было бы если б она была разрешена
         throw new RangeError("Число должно быть > " + minVal);
 
     return n;
@@ -662,15 +782,28 @@ function formatStr(str: string, ...args: any[]): string {
 }
 
 /**
- * если значение null то вывалит ошибку, иначе вернет само значение. Короткий метод для проверок на нулл
+ * Если значение null|undefined то вывалит ошибку, иначе вернет само значение.
+   Короткий метод для проверок на нулл
  * @param val
  */
-function nullCheck<T>(val: T | null | undefined) {
+function nullCheck<T>(val: T | null | undefined): T {
 
     if (val == null)
         throw new Error(`nullCheck Error`);
 
     return val;
+}
+function numberCheck(value: any): number {
+    if (typeof (value) != "number")
+        throw new Error(`${value} не является числом.`);
+
+    return value;
+}
+function stringCheck(value: any): string {
+    if (typeof (value) != "string")
+        throw new Error(`${value} не является строкой.`);
+
+    return value;
 }
 
 /**
@@ -756,9 +889,53 @@ let Url_rx = {
     unit_ware_change_spec: /\/[a-z]+\/window\/unit\/speciality_change\/\d+\/?$/i,   // смена спецухи склада
     unit_finrep: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report(\/graphical)?$/i, // финанс отчет
     unit_finrep_by_prod: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i, // финанс отчет по товарам
+    unit_equipment: /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/ig,             // оборудование
+};
 
-    // API
-    api_unit_sale_contracts: /api\/[a-z]+\/main\/unit\/sale\/contracts/i,     // список контрактов
+let UrlApi_rx = {
+    // для виртономики
+    trade_products: /api\/[a-z]+\/main\/product\/goods$/i,                 // все розничные товары
+    cities: /api\/[a-z]+\/main\/geo\/city\/browse$/i,                      // все города
+    regions: /api\/[a-z]+\/main\/geo\/region\/browse$/i,                   // все регионы
+    retail_products: /api\/[a-z]+\/main\/product\/goods$/i,                // список розничных продуктов с разбивкой по отделам
+
+    // для юнита
+    unit_summary: /api\/[a-z]+\/main\/unit\/summary$/i,                    // общие данные по юниту
+    unit_sale_contracts: /api\/[a-z]+\/main\/unit\/sale\/contracts$/i,     // список контрактов
+    unit_supply_contracts: /api\/[a-z]+\/main\/unit\/supply\/contracts$/i,
+
+    // для компании в целом
+    comp_unit_list: /api\/[a-z]+\/main\/company\/units$/i,           // список юнитов. ТОЛЬКО СВОИХ
+};
+
+let Url_tpl = {
+    // компания в целом
+    comp_unit_list: `/{0}/window/company/view/{1}/unit_list`, // список юнитов. Реалм, АйдиКонторы
+
+    // юнит
+    ajax_deleteContract: `/{0}/ajax/unit/supply/delete`,       // удалить СВОЙ контракт в магазине, складе, заводе итд
+    ajax_createContract: `/{0}/ajax/unit/supply/create`,
+
+    // глобальные виртовские
+    v_glob_suppliers: `/{0}/main/globalreport/marketing/by_products/{1}/`,     // поставщики для товара. Глобально
+
+    // пагинаторы
+    setPaging_marketingProd: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/20000`, // Аналитика - Продукция  
+};
+
+let UrlApi_tpl = {
+    // компания в целом main/company/units?id=3948072&pagesize=20000
+    comp_unit_list: `/api/{0}/main/company/units?id={1}&pagesize={2}`, // список юнитов. Реалм, АйдиКонторы, Размер пагинации
+
+    // юнит
+    unit_saleContracts: `/api/{0}/main/unit/sale/contracts?id={1}`,   // список всех контрактов на продажу в юните
+    unit_supply_contracts: `/api/{0}/main/unit/supply/contracts?id={1}`,
+
+    // глобальные виртовские
+    tradeGoods: `/api/{0}/main/product/goods`,      // список всех торгуемых товаров реалма
+    cities: `/api/{0}/main/geo/city/browse`,        // список всех городов
+    regions: `/api/{0}/main/geo/region/browse`,   
+    retail_products: `/api/{0}/main/product/goods`, // список розничных продуктов с отделами
 };
 
 /**
@@ -889,49 +1066,6 @@ function isUnitFinanceReport(): boolean {
 
 function isCompanyRepByUnit(): boolean {
     return Url_rx.comp_fin_rep_byunit.test(document.location.pathname);
-}
-
-/**
- * Возвращает Истину если данная страница есть страница в магазине своем или чужом. Иначе Ложь
- * @param html полностью страница
- * @param my свой юнит или чужой
- */
-function isShop(html: HTMLDocument, my: boolean = true): boolean {
-    let $html = $(html);
-
-    // нет разницы наш или чужой юнит везде картинка мага нужна. ее нет только если window
-    let $img = $html.find("#unitImage img[src*='/shop_']");
-    if ($img.length > 1)
-        throw new Error(`Найдено несколько (${$img.length}) картинок Магазина.`);
-
-    return $img.length > 0;
-}
-
-function isWarehouse($html: JQuery): boolean {
-
-    // нет разницы наш или чужой юнит везде картинка мага нужна. ее нет только если window
-    let $img = $html.find("#unitImage img[src*='/warehouse_']");
-    if ($img.length > 1)
-        throw new Error(`Найдено несколько (${$img.length}) картинок Склада.`);
-
-    return $img.length > 0;
-}
-
-
-/**
- * Возвращает Истину если данная страница есть страница в заправке своей или чужой. Иначе Ложь
- * @param html полностью страница
- * @param my свой юнит или чужой
- */
-function isFuel(html: HTMLDocument, my: boolean = true): boolean {
-    let $html = $(html);
-
-    // нет разницы наш или чужой юнит везде картинка мага нужна
-    let $img = $html.find("#unitImage img[src*='/fuel_']");
-    if ($img.length > 1)
-        throw new Error(`Найдено несколько (${$img.length}) картинок Магазина.`);
-
-    return $img.length > 0;
 }
 
 function hasTradeHall(html: HTMLDocument, my: boolean = true): boolean {
@@ -1200,6 +1334,22 @@ async function tryGet_async(url: string, retries: number = 10, timeout: number =
 }
 
 /**
+ * Берет строку JSON и конвертает поля в данные. Числа в числа, null в нулл, и t/f в true/false
+ * @param jsonStr
+ */
+function parseJSON(jsonStr: string): any {
+    let obj = JSON.parse(jsonStr, (k, v) => {
+        if (v === "t") return true;
+        if (v === "f") return false;
+
+        return (typeof v === "object" || isNaN(v)) ? v : parseFloat(v);
+    });
+
+    return obj;
+}
+
+
+/**
  * Аналогично обычному методу tryGet_async правда ожидает только json и конвертает по ходу дела числа в числа если они идут строкой
  */
 async function tryGetJSON_async(url: string, retries: number = 10, timeout: number = 1000, beforeGet?: IAction1<string>, onError?: IAction1<string>): Promise<any> {
@@ -1222,10 +1372,7 @@ async function tryGetJSON_async(url: string, retries: number = 10, timeout: numb
         dataType: "text",
 
         success: (jsonStr, status, jqXHR) => {
-            let obj = JSON.parse(jsonStr, (k, v) => {
-                return (typeof v === "object" || isNaN(v)) ? v : parseFloat(v);
-            });
-
+            let obj = parseJSON(jsonStr);
             $deffered.resolve(obj);
         },
 
@@ -1268,7 +1415,9 @@ async function tryGetJSON_async(url: string, retries: number = 10, timeout: numb
 }
 
 /**
- * Отправляет данные на сервер запросом POST. В остальном работает как и гет. Так же вернет промис который ресолвит с возвращенными данными
+ * Отправляет данные на сервер запросом POST. В остальном работает как и гет.
+   Так же вернет промис который ресолвит с возвращенными данными
+   Ожидает назад любые данные, автоматом определит. Для JSON лучше юзать метод tryPostJSON_async где четко указано что ждать
  * @param url
  * @param form данные для отправки на сервер
  * @param retries
@@ -1336,7 +1485,9 @@ async function tryPost_async(url: string, form: any, retries: number = 10, timeo
 }
 
 /**
- * Отправляет данные на сервер запросом POST. В остальном работает как и гет. Так же вернет промис который ресолвит с возвращенными данными
+ * Отправляет данные на сервер запросом POST. В остальном работает как и гет.
+   Так же вернет промис который ресолвит с возвращенными данными
+   Ожидает назад JSON данные
  * @param url
  * @param data данные для отправки на сервер
  * @param retries
