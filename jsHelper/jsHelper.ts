@@ -604,6 +604,24 @@ function extractIntPositive(str: string): number[] | null {
 }
 
 /**
+ * Для заданного пути до файла извлекает имя файла и возвращает Имя и Расширения в таком же порядке.
+ * @param fileUrl /img/products/brand/krakow.gif линк вроде такого
+ */
+function extractFile(fileUrl: string): [string, string] {
+    let items = fileUrl.split("/");
+    if (items.length < 2)
+        throw new Error(`Очевидно что ${fileUrl} не ссылка на файл`);
+
+    let file = items[items.length - 1];
+    let [symbol, ext] = file.split("."); // если нет расширения то будет undef во втором
+    ext = ext == null ? "" : ext;
+    if (symbol.length <= 0)
+        throw new Error(`Нулевая длина имени файлв в ${fileUrl}`);
+
+    return [symbol, ext];
+}
+
+/**
  * По текстовой строке возвращает номер месяца начиная с 0 для января. Либо null
  * @param str очищенная от пробелов и лишних символов строка
  */
@@ -737,32 +755,6 @@ function sayMoney(num: number, symbol:string="$") {
         else result = symbol + result;
     }
     return result;
-}
-
-/**
- * Пробует взять со страницы картинку юнита и спарсить тип юнита
- * Пример сорса /img/v2/units/shop_1.gif  будет тип shop.
- * Он кореллирует четко с i-shop в списке юнитов
- * Если картинки на странице нет, то вернет null. Сам разбирайся почему ее там нет
- * @param $html
- */
-function getUnitTypeOld($html: JQuery): UnitTypes | null {
-
-    let $div = $html.find("#unitImage");
-    if ($div.length === 0)
-        return null;
-
-    let src = $div.find("img").attr("src");
-    let items = src.split("/");
-    if (items.length < 2)
-        throw new Error("Что то не так с урлом картинки " + src);
-
-    let typeStr = items[items.length - 1].split("_")[0];
-    let type: UnitTypes = (UnitTypes as any)[typeStr] ? (UnitTypes as any)[typeStr] : UnitTypes.unknown;
-    if (type == UnitTypes.unknown)
-        throw new Error("Не описан тип юнита " + typeStr);
-
-    return type;
 }
 
 /**
