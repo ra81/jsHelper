@@ -847,6 +847,7 @@ let Url_rx = {
     // для виртономики
     v_city_retail_report: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i, // розничный отчет по конкретному товару
     v_tm_info: /\/[a-z]+\/(?:main|window)\/globalreport\/tm\/info\/?$/i,                        // брендовые товары список
+    v_franchise_info: /\/[a-z]+\/(?:main|window)\/franchise_market\/list\/?$/i,                 // список франшиз
     v_country_duties: /\/[a-z]+\/(?:main|window)\/geo\/countrydutylist\/\d+\/?/i,               // таможенные пошлины и ИЦ
     v_regions: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/region\/?$/i, // список регионов
     v_countries: /\/[a-z]+\/(?:main|window)\/common\/main_page\/game_info\/bonuses\/country\/?$/i, 
@@ -864,7 +865,10 @@ let Url_rx = {
     comp_ads_rep: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/marketing_report\/by_advertising_program\/?$/i,   // отчет по рекламным акциям
     comp_fin_rep_byunit: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i,      // отчет по подразделениями из отчетов
     comp_unit_list: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,     // список юнитов. Работает и для списка юнитов чужой компании
+
+    // групповое управление
     comp_manage_salary: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+\/unit_list\/employee\/salary\/?$/i,     // управление зарплатой 
+    comp_manage_equipment: /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)\/?$/i,       // управление оборудованием купить/ ремонт
 
     // для юнита
     unit_any: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i,                    // внутри юнита. любая страница
