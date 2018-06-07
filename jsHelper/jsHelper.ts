@@ -1203,6 +1203,7 @@ async function tryGet_async(url: string, retries: number = 10, timeout: number =
     $.ajax({
         url: url,
         type: "GET",
+        xhrFields: { withCredentials: true }, // для того чтобы работали запросы с других сайтов в вирту
 
         success: (data, status, jqXHR) => $deffered.resolve(data),
 
@@ -1281,6 +1282,7 @@ async function tryGetJSON_async(url: string, retries: number = 10, timeout: numb
         type: "GET",
         cache: false,
         dataType: "text",
+        xhrFields: { withCredentials: true }, // для того чтобы работали запросы с других сайтов в вирту
 
         success: (jsonStr, status, jqXHR) => {
             let obj = parseJSON(jsonStr);
@@ -1354,6 +1356,7 @@ async function tryPost_async(url: string, form: any, retries: number = 10, timeo
         url: url,
         data: form,
         type: "POST",
+        xhrFields: { withCredentials: true }, // для того чтобы работали запросы с других сайтов в вирту
 
         success: (data, status, jqXHR) => $deferred.resolve(data),
 
@@ -1425,6 +1428,7 @@ async function tryPostJSON_async(url: string, data: any, retries: number = 10, t
         data: data,
         type: "POST",
         dataType: 'JSON',
+        xhrFields: { withCredentials: true }, // для того чтобы работали запросы с других сайтов в вирту
 
         success: (data, status, jqXHR) => $deferred.resolve(data),
 
