@@ -530,13 +530,17 @@ function numberfy(str: string): number {
  * @param value строка являющая собой число больше minVal
  * @param minVal ограничение снизу. Число.
  * @param infinity разрешена ли бесконечность
+ * @param minInclude если включен то мин граница разрешается, иначе НЕ разрешается
  */
-function numberfyOrError(str: string, minVal: number = 0, infinity: boolean = false) {
+function numberfyOrError(str: string, minVal: number = 0, infinity: boolean = false, minInclude: boolean = false) {
     let n = numberfy(str);
     if (!infinity && (n === Number.POSITIVE_INFINITY || n === Number.NEGATIVE_INFINITY))
         throw new RangeError("Получили бесконечность, что запрещено.");
 
-    if (n <= minVal) // TODO: как то блять неудобно что мин граница не разрешается. удобнее было бы если б она была разрешена
+    if (minInclude && n < minVal)
+        throw new RangeError("Число должно быть >= " + minVal);
+
+    if (!minInclude && n <= minVal)
         throw new RangeError("Число должно быть > " + minVal);
 
     return n;
