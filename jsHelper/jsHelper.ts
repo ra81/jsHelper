@@ -538,10 +538,10 @@ function numberfyOrError(str: string, minVal: number = 0, infinity: boolean = fa
         throw new RangeError("Получили бесконечность, что запрещено.");
 
     if (minInclude && n < minVal)
-        throw new RangeError("Число должно быть >= " + minVal);
+        throw new RangeError(`Число ${n} должно быть >= ${minVal}`);
 
     if (!minInclude && n <= minVal)
-        throw new RangeError("Число должно быть > " + minVal);
+        throw new RangeError(`Число ${n} должно быть > ${minVal}`);
 
     return n;
 }
