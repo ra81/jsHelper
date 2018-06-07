@@ -1151,118 +1151,29 @@ function oneOrError($item: JQuery, selector: string): JQuery {
 /**
  * Отправляет запрос на установку нужной пагинации. Возвращает promice дальше делай с ним что надо.
  */
-function doRepage(pages: number, $html?: JQuery): JQueryPromise<string> {
+function doRepage(pages: number, $html?: JQuery): Promise<string> | null {
+
+    if (1) throw new Error("поправить надо функцию. криво работала");
 
     // если не задать данные страницы, то считаем что надо использовать текущую
-    if ($html == null)
-        $html = $(document);
+    //if ($html == null)
+    //    $html = $(document);
 
-    // снизу всегда несколько кнопок для числа страниц, НО одна может быть уже нажата мы не знаем какая
-    // берем просто любую ненажатую, извлекаем ее текст, на у далее в ссылке всегда
-    // есть число такое же как текст в кнопке. Заменяем на свое и все ок.
-    let $pager = $html.find('ul.pager_options li').has("a").last();
-    let num = $pager.text().trim();
-    let pagerUrl = $pager.find('a').attr('href').replace(num, pages.toString());
+    //// снизу всегда несколько кнопок для числа страниц, НО одна может быть уже нажата мы не знаем какая
+    //// берем просто любую ненажатую, извлекаем ее текст, на у далее в ссылке всегда
+    //// есть число такое же как текст в кнопке. Заменяем на свое и все ок.
+    //let $pager = $html.find('ul.pager_options li').has("a").last();
+    //let num = $pager.text().trim();
+    //let pagerUrl = $pager.find('a').attr('href').replace(num, pages.toString());
 
-    // запросили обновление пагинации, дальше юзер решает что ему делать с этим
-    let deffered = $.Deferred();
-    $.get(pagerUrl)
-        .done((data, status, jqXHR) => deffered.resolve(data))
-        .fail((err) => deffered.reject("Не удалось установить пагинацию => " + err));
+    //// запросили обновление пагинации, дальше юзер решает что ему делать с этим
+    //let deffered = $.Deferred();
+    //$.get(pagerUrl)
+    //    .done((data, status, jqXHR) => deffered.resolve(data))
+    //    .fail((err) => deffered.reject("Не удалось установить пагинацию => " + err));
 
-    return deffered.promise();
-}
-
-/**
- * Загружается указанную страницу используя заданное число повторов и таймаут. Так же можно задать
- * нужно ли убирать пагинацию или нет. Если нужно, то функция вернет страничку БЕЗ пагинации
- * @param url
- * @param retries число попыток
- * @param timeout 
- * @param repage нужно ли убирать пагинацию
- */
-function getPage(url: string, retries: number = 10, timeout: number = 1000, repage: boolean = true): JQueryPromise<string> {
-
-    let deffered = $.Deferred();
-
-    // сначала запросим саму страницу с перезапросом по ошибке
-    tryGet(url, retries, timeout)
-        .then((html) => {
-
-            let locdef = $.Deferred();
-
-            if (html == null) {
-                locdef.reject("неизвестная ошибка. страница пришла пустая " + url);
-                return locdef.promise();
-            }
-
-            // если страниц нет, то как бы не надо ничо репейджить
-            // если не надо репейджить то тоже не будем
-            let $html = $(html);
-            if (!repage || !hasPages($html)) {
-                deffered.resolve(html);
-            }
-            else {
-                // репейджим
-                let purl = getRepageUrl($html, 10000);
-                if (purl == null)
-                    locdef.reject("не смог вытащить урл репейджа хотя он там должен быть");
-                else
-                    locdef.resolve(purl);
-            }
-
-            return locdef.promise();
-        })          // если нет репейджа все закончится тут
-        .then((purl: string) => {
-            let locdef = $.Deferred();
-
-            tryGet(purl, retries, timeout)
-                .done(() => locdef.resolve())
-                .fail((err) => locdef.reject("ошибка репейджа => " + err));
-
-            return locdef.promise();
-        })  // запросим установку репейджа
-        .then(() => tryGet(url, retries, timeout)) // снова запросим страницу
-        .then((html) => deffered.resolve(html))
-        .fail((err) => deffered.reject(err));
-
-    return deffered.promise();
-}
-
-/**
- * Запрашивает страницу. При ошибке поробует повторить запрос через заданное число секунд.
- * Пробует заданное число попыток, после чего возвращает reject
- * @param url
- * @param retries число попыток загрузки
- * @param timeout таймаут между попытками
- */
-function tryGet(url: string, retries: number = 10, timeout: number = 1000): JQueryPromise<string> {
-    let $deffered = $.Deferred();
-    $deffered.notify("0: " + url); // сразу даем уведомление, это работает. НО только 1 сработает если вызвать ДО установки прогресс хендлера на промис
-
-    $.ajax({
-        url: url,
-        type: "GET",
-
-        success: (data, status, jqXHR) => $deffered.resolve(data),
-
-        error: function (this: JQueryAjaxSettings, jqXHR: JQueryXHR, textStatus: string, errorThrown: string) {
-            retries--;
-            if (retries <= 0) {
-                $deffered.reject("Не смог загрузить страницу " + this.url);
-                return;
-            }
-
-            logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
-            let _this = this;
-            setTimeout(() => {
-                $deffered.notify("0: " + url);     // уведомляем об очередном запросе
-                $.ajax(_this);
-            }, timeout);
-        }
-    });
-
-    return $deffered.promise();
+    // return deffered.promise();
+    return null;
 }
 
 /**
