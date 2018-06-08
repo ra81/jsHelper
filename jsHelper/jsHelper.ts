@@ -847,6 +847,59 @@ function sleep_async(ms: number) {
 //let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i;    // таможенные пошлины и ИЦ
 // let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i;    // брендовые товары список
 
+interface IUrlTemplate {
+    tpl: string | null;
+    rx: RegExp | null;
+}
+let commonUrls = {
+    /** все поставщики товара в виртономике глобально [реалм, айди товара] */
+    virt_product_suppliers: {
+        tpl:    `/{0}/main/globalreport/marketing/by_products/{1}/`,
+        rx:     /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i
+    },
+    /** розничный отчет по городу для товара [реалм,pid,countryID, regionID, cityID]*/
+    virt_city_retail_report: {
+        tpl:    `/{0}/window/globalreport/marketing/by_trade_at_cities/{1}/{2}/{3}/{4}`,
+        rx:     /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
+    },
+    /** общий список всех типов предприятий в игре [реалм]*/
+    virt_unit_types_api: {
+        tpl: `/api/{0}/main/unittype/browse`,
+    },
+    /** спецухи данного типа предприятия и их характеристики [реалм, айди типа] */
+    virt_type_spec_api: {
+        tpl: `/api/{0}/main/unittype/produce?id={1}`,
+    },
+    /** список всех розничных продуктов с отделами [реалм]*/
+    virt_retail_products_api: {
+        tpl: `/api/{0}/main/product/goods`,
+    },
+
+
+    /** список юнитов. [Реалм, АйдиКонторы] */
+    comp_unit_list: { 
+        tpl:    `/{0}/window/company/view/{1}/unit_list`, 
+        rx:     /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,  // Работает и для списка юнитов чужой компании
+    },
+
+
+
+    /** удалить свой контракт в магазине, складе заводе и т.д [Реалм] */
+    unit_ajax_deleteContract: {
+        tpl:    `/{0}/ajax/unit/supply/delete`,
+    },
+    /** создать новый контракт в магазине складе заводе итд [Реалм]*/
+    unit_ajax_createContract: {
+        tlp:    `/{0}/ajax/unit/supply/create`,
+    },
+
+
+    /** пагинатор Аналитика - Продукция [реалм, pagesize]*/
+    pager_virt_product_suppliers: {
+        tlp: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/{1}`,
+    }
+};
+
 let Url_rx = {
     // для виртономики
     v_city_retail_report: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i, // розничный отчет по конкретному товару
@@ -909,18 +962,18 @@ let UrlApi_rx = {
 };
 
 let Url_tpl = {
-    // компания в целом
-    comp_unit_list: `/{0}/window/company/view/{1}/unit_list`, // список юнитов. Реалм, АйдиКонторы
+    //// компания в целом
+    //comp_unit_list: `/{0}/window/company/view/{1}/unit_list`, // список юнитов. Реалм, АйдиКонторы
 
-    // юнит
-    ajax_deleteContract: `/{0}/ajax/unit/supply/delete`,       // удалить СВОЙ контракт в магазине, складе, заводе итд
-    ajax_createContract: `/{0}/ajax/unit/supply/create`,
+    //// юнит
+    //ajax_deleteContract: `/{0}/ajax/unit/supply/delete`,       // удалить СВОЙ контракт в магазине, складе, заводе итд
+    //ajax_createContract: `/{0}/ajax/unit/supply/create`,
 
-    // глобальные виртовские
-    v_glob_suppliers: `/{0}/main/globalreport/marketing/by_products/{1}/`,     // поставщики для товара. Глобально
+    //// глобальные виртовские
+    //v_glob_suppliers: `/{0}/main/globalreport/marketing/by_products/{1}/`,     // поставщики для товара. Глобально
 
-    // пагинаторы
-    setPaging_marketingProd: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/20000`, // Аналитика - Продукция  
+    //// пагинаторы
+    //setPaging_marketingProd: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/20000`, // Аналитика - Продукция  
 };
 
 let UrlApi_tpl = {
