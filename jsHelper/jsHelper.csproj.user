@@ -3,6 +3,11 @@
   <PropertyGroup>
     <UseIISExpress>true</UseIISExpress>
     <ToolsVersionPromptShown>2.9</ToolsVersionPromptShown>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>
@@ -10,7 +15,7 @@
         <WebProjectProperties>
           <StartPageUrl>
           </StartPageUrl>
-          <StartAction>CurrentPage</StartAction>
+          <StartAction>NoStartPage</StartAction>
           <AspNetDebugging>True</AspNetDebugging>
           <SilverlightDebugging>False</SilverlightDebugging>
           <NativeDebugging>False</NativeDebugging>
