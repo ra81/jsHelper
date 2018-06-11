@@ -876,6 +876,18 @@ let commonUrls = {
     virt_retail_products_api: {
         tpl: `/api/{0}/main/product/goods`,
     },
+    /** список всех городов реалма [реалм]*/
+    virt_cities_api: {
+        tpl: `/api/{0}/main/geo/city/browse`,
+    },
+    /** список всех регионов реалма [реалм]*/
+    virt_regions_api: {
+        tpl: `/api/{0}/main/geo/region/browse`,
+    },
+    /** список всех стран реалма [реалм]*/
+    virt_countries_api: {
+        tpl: `/api/{0}/main/geo/country/browse`,
+    },
 
 
     /** список юнитов. [Реалм, АйдиКонторы] */
