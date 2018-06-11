@@ -9,6 +9,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 /*
 Есть классы юнитов (unit_class или kind), они обладают общими свойствами и в целом интерфейсом. Отличаються могут оборудованием.
 Легкие сервисы включают прачечные парикмахерские и так далее. Это типы юнитов. unit_type
@@ -131,7 +158,7 @@ var MarketIndex;
     MarketIndex[MarketIndex["AAA"] = 6] = "AAA";
 })(MarketIndex || (MarketIndex = {}));
 function mIndexFromString(str) {
-    let index = MarketIndex.None;
+    var index = MarketIndex.None;
     switch (str) {
         case "AAA":
             return MarketIndex.AAA;
@@ -151,7 +178,7 @@ function mIndexFromString(str) {
         case "None":
             return MarketIndex.None;
         default:
-            throw new Error(`Неизвестный индекс рынка: ${str}`);
+            throw new Error("\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u044B\u0439 \u0438\u043D\u0434\u0435\u043A\u0441 \u0440\u044B\u043D\u043A\u0430: " + str);
     }
 }
 /**
@@ -160,8 +187,8 @@ function mIndexFromString(str) {
  * @param enumType тип множества
  */
 function enum2Arr(enumType) {
-    let res = [];
-    for (let key in enumType) {
+    var res = [];
+    for (var key in enumType) {
         if (typeof enumType[key] === "number")
             res.push(enumType[key]);
     }
@@ -170,33 +197,39 @@ function enum2Arr(enumType) {
 /**
  * Простой счетчик. Увеличивается на 1 при каждом вызове метода Next. Нужен для подсчета числа запросов
  */
-class Counter {
-    constructor() {
-        this.Next = () => {
-            this._count++;
+var Counter = /** @class */ (function () {
+    function Counter() {
+        var _this_1 = this;
+        this.Next = function () {
+            _this_1._count++;
         };
         this._count = 0;
     }
     ;
-    get Count() {
-        return this._count;
-    }
-}
+    Object.defineProperty(Counter.prototype, "Count", {
+        get: function () {
+            return this._count;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Counter;
+}());
 function keysN(dict) {
-    return Object.keys(dict).map(k => parseInt(k));
+    return Object.keys(dict).map(function (k) { return parseInt(k); });
 }
 function keys(obj) {
     return Object.keys(obj);
 }
 function valuesN(dict) {
-    let res = [];
-    for (let key in dict)
+    var res = [];
+    for (var key in dict)
         res.push(dict[key]);
     return res;
 }
 function values(dict) {
-    let res = [];
-    for (let key in dict)
+    var res = [];
+    for (var key in dict)
         res.push(dict[key]);
     return res;
 }
@@ -219,8 +252,8 @@ function isEmpty(obj) {
 function dict2String(dict) {
     if (isEmpty(dict))
         return "";
-    let newItems = [];
-    for (let key in dict)
+    var newItems = [];
+    for (var key in dict)
         newItems.push(key + ":" + dict[key].toString());
     return newItems.join(", ");
 }
@@ -231,9 +264,9 @@ function dict2String(dict) {
  * @param selector
  */
 function filterDictVal(dict, selector) {
-    let res = {};
-    for (let key in dict) {
-        let item = dict[key];
+    var res = {};
+    for (var key in dict) {
+        var item = dict[key];
         if (selector(item))
             res[key] = item;
     }
@@ -247,12 +280,12 @@ function filterDictVal(dict, selector) {
 function mergeDict(dict1, dict2) {
     if (dict1 == null || dict2 == null)
         throw new Error("аргументы не должны быть null");
-    let res = {};
-    for (let key in dict1)
+    var res = {};
+    for (var key in dict1)
         res[key] = dict1[key];
-    for (let key in dict2) {
+    for (var key in dict2) {
         if (res[key] != null)
-            throw new Error(`dict1 уже имеет такой же ключ '${key}' как и dict2`);
+            throw new Error("dict1 \u0443\u0436\u0435 \u0438\u043C\u0435\u0435\u0442 \u0442\u0430\u043A\u043E\u0439 \u0436\u0435 \u043A\u043B\u044E\u0447 '" + key + "' \u043A\u0430\u043A \u0438 dict2");
         res[key] = dict2[key];
     }
     return res;
@@ -260,12 +293,12 @@ function mergeDict(dict1, dict2) {
 function mergeDictN(dict1, dict2) {
     if (dict1 == null || dict2 == null)
         throw new Error("аргументы не должны быть null");
-    let res = {};
-    for (let key in dict1)
+    var res = {};
+    for (var key in dict1)
         res[key] = dict1[key];
-    for (let key in dict2) {
+    for (var key in dict2) {
         if (res[key] != null)
-            throw new Error(`dict1 уже имеет такой же ключ '${key}' как и dict2`);
+            throw new Error("dict1 \u0443\u0436\u0435 \u0438\u043C\u0435\u0435\u0442 \u0442\u0430\u043A\u043E\u0439 \u0436\u0435 \u043A\u043B\u044E\u0447 '" + key + "' \u043A\u0430\u043A \u0438 dict2");
         res[key] = dict2[key];
     }
     return res;
@@ -286,13 +319,14 @@ function isOneOf(item, arr) {
  * @param keySelector
  */
 function toDictionaryN(arr, keySelector) {
-    let res = {};
+    var res = {};
     if (!arr)
         throw new Error("arr null");
     if (!keySelector)
         throw new Error("keySelector null");
-    for (let el of arr) {
-        let k = keySelector(el);
+    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+        var el = arr_1[_i];
+        var k = keySelector(el);
         if (!k)
             throw new Error("Ключ не может быть неопределен!");
         if (res[k])
@@ -306,9 +340,9 @@ function toDictionaryN(arr, keySelector) {
  * @param array
  */
 function unique(array) {
-    let res = [];
-    for (let i = 0; i < array.length; i++) {
-        let item = array[i];
+    var res = [];
+    for (var i = 0; i < array.length; i++) {
+        var item = array[i];
         if (array.indexOf(item) === i)
             res.push(item);
     }
@@ -323,13 +357,14 @@ function unique(array) {
 function intersect(a, b) {
     // чтобы быстрее бегал indexOf в A кладем более длинный массив
     if (b.length > a.length) {
-        let t = b;
+        var t = b;
         b = a;
         a = t;
     }
     // находим пересечение с дублями
-    let intersect = [];
-    for (let item of a) {
+    var intersect = [];
+    for (var _i = 0, a_1 = a; _i < a_1.length; _i++) {
+        var item = a_1[_i];
         if (b.indexOf(item) >= 0)
             intersect.push(item);
     }
@@ -344,11 +379,11 @@ function intersect(a, b) {
  */
 function roundTo(n, decimals) {
     if (isNaN(n) || isNaN(decimals))
-        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+        throw new Error("\u0447\u0438\u0441\u043B\u0430 \u0434\u043E\u043B\u0436\u043D\u044B \u0431\u044B\u0442\u044C \u0437\u0430\u0434\u0430\u043D\u044B. n:" + n + ", decimals:" + decimals);
     if (decimals < 0)
-        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+        throw new Error("decimals: " + decimals + " \u043D\u0435 \u043C\u043E\u0436\u0435\u0442 \u0431\u044B\u0442\u044C \u043C\u0435\u043D\u044C\u0448\u0435 0");
     decimals = Math.round(decimals); // делаем ставку на косяки округления откуда может прилететь 1.00000001
-    let f = Math.pow(10, decimals);
+    var f = Math.pow(10, decimals);
     return Math.round(n * f) / f;
 }
 /**
@@ -359,11 +394,11 @@ function roundTo(n, decimals) {
  */
 function floorTo(n, decimals) {
     if (isNaN(n) || isNaN(decimals))
-        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+        throw new Error("\u0447\u0438\u0441\u043B\u0430 \u0434\u043E\u043B\u0436\u043D\u044B \u0431\u044B\u0442\u044C \u0437\u0430\u0434\u0430\u043D\u044B. n:" + n + ", decimals:" + decimals);
     if (decimals < 0)
-        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+        throw new Error("decimals: " + decimals + " \u043D\u0435 \u043C\u043E\u0436\u0435\u0442 \u0431\u044B\u0442\u044C \u043C\u0435\u043D\u044C\u0448\u0435 0");
     decimals = Math.round(decimals); // делаем ставку на косяки округления откуда может прилететь 1.00000001
-    let f = Math.pow(10, decimals);
+    var f = Math.pow(10, decimals);
     return Math.floor(n * f + 1e-10) / f;
 }
 /**
@@ -374,11 +409,11 @@ function floorTo(n, decimals) {
  */
 function ceilTo(n, decimals) {
     if (isNaN(n) || isNaN(decimals))
-        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+        throw new Error("\u0447\u0438\u0441\u043B\u0430 \u0434\u043E\u043B\u0436\u043D\u044B \u0431\u044B\u0442\u044C \u0437\u0430\u0434\u0430\u043D\u044B. n:" + n + ", decimals:" + decimals);
     if (decimals < 0)
-        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+        throw new Error("decimals: " + decimals + " \u043D\u0435 \u043C\u043E\u0436\u0435\u0442 \u0431\u044B\u0442\u044C \u043C\u0435\u043D\u044C\u0448\u0435 0");
     decimals = Math.round(decimals); // делаем ставку на косяки округления откуда может прилететь 1.00000001
-    let f = Math.pow(10, decimals);
+    var f = Math.pow(10, decimals);
     return Math.ceil(n * f - 1e-10) / f;
 }
 // PARSE -------------------------------------------
@@ -395,14 +430,14 @@ function cleanStr(str) {
 function getRealm() {
     // https://*virtonomic*.*/*/main/globalreport/marketing/by_trade_at_cities/*
     // https://*virtonomic*.*/*/window/globalreport/marketing/by_trade_at_cities/*
-    let rx = new RegExp(/https:\/\/virtonomic[A-Za-z]+\.[a-zA-Z]+\/([a-zA-Z]+)\/.+/ig);
-    let m = rx.exec(document.location.href);
+    var rx = new RegExp(/https:\/\/virtonomic[A-Za-z]+\.[a-zA-Z]+\/([a-zA-Z]+)\/.+/ig);
+    var m = rx.exec(document.location.href);
     if (m == null)
         return null;
     return m[1];
 }
 function getRealmOrError() {
-    let realm = getRealm();
+    var realm = getRealm();
     if (realm === null)
         throw new Error("Не смог определить реалм по ссылке " + document.location.href);
     return realm;
@@ -411,11 +446,11 @@ function getRealmOrError() {
  * Парсит id компании со страницы. Если не получилось то вернет null
  */
 function parseCompanyId(html) {
-    let $html = $(html);
-    let href = $html.find("a.dashboard").attr("href");
+    var $html = $(html);
+    var href = $html.find("a.dashboard").attr("href");
     if (href == null || href.length <= 0)
         return null;
-    let arr = href.match(/\d+/);
+    var arr = href.match(/\d+/);
     if (arr == null || arr.length !== 1)
         return null;
     return numberfyOrError(arr[0]);
@@ -438,7 +473,7 @@ function numberfy(str) {
     else {
         // если str будет undef null или что то страшное, то String() превратит в строку после чего парсинг даст NaN
         // не будет эксепшнов
-        let n = parseFloat(cleanStr(String(str)));
+        var n = parseFloat(cleanStr(String(str)));
         return isNaN(n) ? -1 : n;
     }
 }
@@ -451,14 +486,17 @@ function numberfy(str) {
  * @param infinity разрешена ли бесконечность
  * @param minInclude если включен то мин граница разрешается, иначе НЕ разрешается
  */
-function numberfyOrError(str, minVal = 0, infinity = false, minInclude = false) {
-    let n = numberfy(str);
+function numberfyOrError(str, minVal, infinity, minInclude) {
+    if (minVal === void 0) { minVal = 0; }
+    if (infinity === void 0) { infinity = false; }
+    if (minInclude === void 0) { minInclude = false; }
+    var n = numberfy(str);
     if (!infinity && (n === Number.POSITIVE_INFINITY || n === Number.NEGATIVE_INFINITY))
         throw new RangeError("Получили бесконечность, что запрещено.");
     if (minInclude && n < minVal)
-        throw new RangeError(`Число ${n} должно быть >= ${minVal}`);
+        throw new RangeError("\u0427\u0438\u0441\u043B\u043E " + n + " \u0434\u043E\u043B\u0436\u043D\u043E \u0431\u044B\u0442\u044C >= " + minVal);
     if (!minInclude && n <= minVal)
-        throw new RangeError(`Число ${n} должно быть > ${minVal}`);
+        throw new RangeError("\u0427\u0438\u0441\u043B\u043E " + n + " \u0434\u043E\u043B\u0436\u043D\u043E \u0431\u044B\u0442\u044C > " + minVal);
     return n;
 }
 /**
@@ -468,11 +506,11 @@ function numberfyOrError(str, minVal = 0, infinity = false, minInclude = false) 
  * @param rx паттерн который ищем
  */
 function matchedOrError(str, rx, errMsg) {
-    let m = str.match(rx);
+    var m = str.match(rx);
     if (m == null)
-        throw new Error(errMsg || `Паттерн ${rx} не найден в ${str}`);
+        throw new Error(errMsg || "\u041F\u0430\u0442\u0442\u0435\u0440\u043D " + rx + " \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 " + str);
     if (m.length > 1)
-        throw new Error(errMsg || `Паттерн ${rx} найден в ${str} ${m.length} раз вместо ожидаемого 1`);
+        throw new Error(errMsg || "\u041F\u0430\u0442\u0442\u0435\u0440\u043D " + rx + " \u043D\u0430\u0439\u0434\u0435\u043D \u0432 " + str + " " + m.length + " \u0440\u0430\u0437 \u0432\u043C\u0435\u0441\u0442\u043E \u043E\u0436\u0438\u0434\u0430\u0435\u043C\u043E\u0433\u043E 1");
     return m[0];
 }
 /**
@@ -483,9 +521,9 @@ function matchedOrError(str, rx, errMsg) {
  * @param errMsg
  */
 function execOrError(str, rx, errMsg) {
-    let m = rx.exec(str);
+    var m = rx.exec(str);
     if (m == null)
-        throw new Error(errMsg || `Паттерн ${rx} не найден в ${str}`);
+        throw new Error(errMsg || "\u041F\u0430\u0442\u0442\u0435\u0440\u043D " + rx + " \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u0432 " + str);
     return m;
 }
 /**
@@ -495,10 +533,10 @@ function execOrError(str, rx, errMsg) {
  * @param str
  */
 function extractFloatPositive(str) {
-    let m = cleanStr(str).match(/\d+\.\d+/ig);
+    var m = cleanStr(str).match(/\d+\.\d+/ig);
     if (m == null)
         return null;
-    let n = m.map((val, i, arr) => numberfyOrError(val, -1));
+    var n = m.map(function (val, i, arr) { return numberfyOrError(val, -1); });
     return n;
 }
 /**
@@ -506,10 +544,10 @@ function extractFloatPositive(str) {
  * @param str
  */
 function extractIntPositive(str) {
-    let m = cleanStr(str).match(/\d+/ig);
+    var m = cleanStr(str).match(/\d+/ig);
     if (m == null)
         return null;
-    let n = m.map((val, i, arr) => numberfyOrError(val, -1));
+    var n = m.map(function (val, i, arr) { return numberfyOrError(val, -1); });
     return n;
 }
 /**
@@ -517,14 +555,14 @@ function extractIntPositive(str) {
  * @param fileUrl /img/products/brand/krakow.gif линк вроде такого
  */
 function extractFile(fileUrl) {
-    let items = fileUrl.split("/");
+    var items = fileUrl.split("/");
     if (items.length < 2)
-        throw new Error(`Очевидно что ${fileUrl} не ссылка на файл`);
-    let file = items[items.length - 1];
-    let [symbol, ext] = file.split("."); // если нет расширения то будет undef во втором
+        throw new Error("\u041E\u0447\u0435\u0432\u0438\u0434\u043D\u043E \u0447\u0442\u043E " + fileUrl + " \u043D\u0435 \u0441\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0444\u0430\u0439\u043B");
+    var file = items[items.length - 1];
+    var _a = file.split("."), symbol = _a[0], ext = _a[1]; // если нет расширения то будет undef во втором
     ext = ext == null ? "" : ext;
     if (symbol.length <= 0)
-        throw new Error(`Нулевая длина имени файлв в ${fileUrl}`);
+        throw new Error("\u041D\u0443\u043B\u0435\u0432\u0430\u044F \u0434\u043B\u0438\u043D\u0430 \u0438\u043C\u0435\u043D\u0438 \u0444\u0430\u0439\u043B\u0432 \u0432 " + fileUrl);
     return [symbol, ext];
 }
 /**
@@ -532,8 +570,8 @@ function extractFile(fileUrl) {
  * @param str очищенная от пробелов и лишних символов строка
  */
 function monthFromStr(str) {
-    let mnth = ["январ", "феврал", "март", "апрел", "ма", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр"];
-    for (let i = 0; i < mnth.length; i++) {
+    var mnth = ["январ", "феврал", "март", "апрел", "ма", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр"];
+    for (var i = 0; i < mnth.length; i++) {
         if (str.indexOf(mnth[i]) === 0)
             return i;
     }
@@ -545,21 +583,21 @@ function monthFromStr(str) {
  * @param str
  */
 function extractDate(str) {
-    let dateRx = /^(\d{1,2})\s+([а-я]+)\s+(\d{1,4})/i;
-    let m = dateRx.exec(str);
+    var dateRx = /^(\d{1,2})\s+([а-я]+)\s+(\d{1,4})/i;
+    var m = dateRx.exec(str);
     if (m == null)
         return null;
-    let d = parseInt(m[1]);
-    let mon = monthFromStr(m[2]);
+    var d = parseInt(m[1]);
+    var mon = monthFromStr(m[2]);
     if (mon == null)
         return null;
-    let y = parseInt(m[3]);
+    var y = parseInt(m[3]);
     return new Date(y, mon, d);
 }
 function extractDateOrError(str) {
-    let dt = extractDate(str);
+    var dt = extractDate(str);
     if (dt == null)
-        throw new Error(`Не получилось извлечь дату из "${str}"`);
+        throw new Error("\u041D\u0435 \u043F\u043E\u043B\u0443\u0447\u0438\u043B\u043E\u0441\u044C \u0438\u0437\u0432\u043B\u0435\u0447\u044C \u0434\u0430\u0442\u0443 \u0438\u0437 \"" + str + "\"");
     return dt;
 }
 /**
@@ -567,26 +605,26 @@ function extractDateOrError(str) {
  * @param date
  */
 function dateToShort(date) {
-    let d = date.getDate();
-    let m = date.getMonth() + 1;
-    let yyyy = date.getFullYear();
-    let dStr = d < 10 ? "0" + d : d.toString();
-    let mStr = m < 10 ? "0" + m : m.toString();
-    return `${dStr}.${mStr}.${yyyy}`;
+    var d = date.getDate();
+    var m = date.getMonth() + 1;
+    var yyyy = date.getFullYear();
+    var dStr = d < 10 ? "0" + d : d.toString();
+    var mStr = m < 10 ? "0" + m : m.toString();
+    return dStr + "." + mStr + "." + yyyy;
 }
 /**
  * из строки вида 01.12.2017 формирует дату
  * @param str
  */
 function dateFromShort(str) {
-    let items = str.split(".");
-    let d = parseInt(items[0]);
+    var items = str.split(".");
+    var d = parseInt(items[0]);
     if (d <= 0)
         throw new Error("дата неправильная.");
-    let m = parseInt(items[1]) - 1;
+    var m = parseInt(items[1]) - 1;
     if (m < 0)
         throw new Error("месяц неправильная.");
-    let y = parseInt(items[2]);
+    var y = parseInt(items[2]);
     if (y < 0)
         throw new Error("год неправильная.");
     return new Date(y, m, d);
@@ -602,10 +640,10 @@ function sayNumber(num) {
         num = Math.round(num * 100) / 100;
     else
         num = Math.round(num);
-    let s = num.toString();
-    let s1 = "";
-    let l = s.length;
-    let p = s.indexOf(".");
+    var s = num.toString();
+    var s1 = "";
+    var l = s.length;
+    var p = s.indexOf(".");
     if (p > -1) {
         s1 = s.substr(p);
         l = p;
@@ -636,8 +674,9 @@ function sayNumber(num) {
  * @param num
  * @param symbol
  */
-function sayMoney(num, symbol = "$") {
-    let result = sayNumber(num);
+function sayMoney(num, symbol) {
+    if (symbol === void 0) { symbol = "$"; }
+    var result = sayNumber(num);
     if (symbol != null) {
         if (num < 0)
             result = '-' + symbol + sayNumber(Math.abs(num));
@@ -652,10 +691,14 @@ function sayMoney(num, symbol = "$") {
  * @param str шаблон строки
  * @param args аргументы которые подставить
  */
-function formatStr(str, ...args) {
-    let res = str.replace(/{(\d+)}/g, (match, number) => {
+function formatStr(str) {
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    var res = str.replace(/{(\d+)}/g, function (match, number) {
         if (args[number] == null)
-            throw new Error(`плейсхолдер ${number} не имеет значения`);
+            throw new Error("\u043F\u043B\u0435\u0439\u0441\u0445\u043E\u043B\u0434\u0435\u0440 " + number + " \u043D\u0435 \u0438\u043C\u0435\u0435\u0442 \u0437\u043D\u0430\u0447\u0435\u043D\u0438\u044F");
         return args[number];
     });
     return res;
@@ -667,19 +710,19 @@ function formatStr(str, ...args) {
  */
 function nullCheck(val) {
     if (val == null)
-        throw new Error(`nullCheck Error`);
+        throw new Error("nullCheck Error");
     return val;
 }
 /** проверяет чтобы value было стопудово числом а не другой хуйней */
 function numberCheck(value) {
     if (isNaN(value) || value == Infinity || typeof (value) != "number")
-        throw new Error(`${value} не является числом.`);
+        throw new Error(value + " \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0447\u0438\u0441\u043B\u043E\u043C.");
     return value;
 }
 /** проверяет чтобы value было стопудово строкой а не другой хуйней */
 function stringCheck(value) {
     if (typeof (value) != "string")
-        throw new Error(`${value} не является строкой.`);
+        throw new Error(value + " \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0441\u0442\u0440\u043E\u043A\u043E\u0439.");
     return value;
 }
 /**
@@ -687,62 +730,62 @@ function stringCheck(value) {
  * @param ms
  */
 function sleep_async(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(function (resolve) { return setTimeout(resolve, ms); });
 }
-let commonUrls = {
+var commonUrls = {
     /** все поставщики товара в виртономике глобально [реалм, айди товара] */
     virt_product_suppliers: {
-        tpl: `/{0}/main/globalreport/marketing/by_products/{1}/`,
+        tpl: "/{0}/main/globalreport/marketing/by_products/{1}/",
         rx: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i
     },
     /** розничный отчет по городу для товара [реалм,pid,countryID, regionID, cityID]*/
     virt_city_retail_report: {
-        tpl: `/{0}/window/globalreport/marketing/by_trade_at_cities/{1}/{2}/{3}/{4}`,
+        tpl: "/{0}/window/globalreport/marketing/by_trade_at_cities/{1}/{2}/{3}/{4}",
         rx: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
     },
     /** общий список всех типов предприятий в игре [реалм]*/
     virt_unit_types_api: {
-        tpl: `/api/{0}/main/unittype/browse`,
+        tpl: "/api/{0}/main/unittype/browse",
     },
     /** спецухи данного типа предприятия и их характеристики [реалм, айди типа] */
     virt_type_spec_api: {
-        tpl: `/api/{0}/main/unittype/produce?id={1}`,
+        tpl: "/api/{0}/main/unittype/produce?id={1}",
     },
     /** список всех розничных продуктов с отделами [реалм]*/
     virt_retail_products_api: {
-        tpl: `/api/{0}/main/product/goods`,
+        tpl: "/api/{0}/main/product/goods",
     },
     /** список всех городов реалма [реалм]*/
     virt_cities_api: {
-        tpl: `/api/{0}/main/geo/city/browse`,
+        tpl: "/api/{0}/main/geo/city/browse",
     },
     /** список всех регионов реалма [реалм]*/
     virt_regions_api: {
-        tpl: `/api/{0}/main/geo/region/browse`,
+        tpl: "/api/{0}/main/geo/region/browse",
     },
     /** список всех стран реалма [реалм]*/
     virt_countries_api: {
-        tpl: `/api/{0}/main/geo/country/browse`,
+        tpl: "/api/{0}/main/geo/country/browse",
     },
     /** список юнитов. [Реалм, АйдиКонторы] */
     comp_unit_list: {
-        tpl: `/{0}/window/company/view/{1}/unit_list`,
+        tpl: "/{0}/window/company/view/{1}/unit_list",
         rx: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,
     },
     /** удалить свой контракт в магазине, складе заводе и т.д [Реалм] */
     unit_ajax_deleteContract: {
-        tpl: `/{0}/ajax/unit/supply/delete`,
+        tpl: "/{0}/ajax/unit/supply/delete",
     },
     /** создать новый контракт в магазине складе заводе итд [Реалм]*/
     unit_ajax_createContract: {
-        tlp: `/{0}/ajax/unit/supply/create`,
+        tlp: "/{0}/ajax/unit/supply/create",
     },
     /** пагинатор Аналитика - Продукция [реалм, pagesize]*/
     pager_virt_product_suppliers: {
-        tlp: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/{1}`,
+        tlp: "/{0}/main/common/util/setpaging/reportcompany/marketingProduct/{1}",
     }
 };
-let Url_rx = {
+var Url_rx = {
     // для виртономики
     v_city_retail_report: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
     v_tm_info: /\/[a-z]+\/(?:main|window)\/globalreport\/tm\/info\/?$/i,
@@ -783,7 +826,7 @@ let Url_rx = {
     unit_finrep_by_prod: /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i,
     unit_equipment: /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/ig,
 };
-let UrlApi_rx = {
+var UrlApi_rx = {
     // для виртономики
     trade_products: /api\/[a-z]+\/main\/product\/goods$/i,
     cities: /api\/[a-z]+\/main\/geo\/city\/browse$/i,
@@ -796,7 +839,7 @@ let UrlApi_rx = {
     // для компании в целом
     comp_unit_list: /api\/[a-z]+\/main\/company\/units$/i,
 };
-let Url_tpl = {
+var Url_tpl = {
 //// компания в целом
 //comp_unit_list: `/{0}/window/company/view/{1}/unit_list`, // список юнитов. Реалм, АйдиКонторы
 //// юнит
@@ -807,17 +850,17 @@ let Url_tpl = {
 //// пагинаторы
 //setPaging_marketingProd: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/20000`, // Аналитика - Продукция  
 };
-let UrlApi_tpl = {
+var UrlApi_tpl = {
     // компания в целом main/company/units?id=3948072&pagesize=20000
-    comp_unit_list: `/api/{0}/main/company/units?id={1}&pagesize={2}`,
+    comp_unit_list: "/api/{0}/main/company/units?id={1}&pagesize={2}",
     // юнит
-    unit_saleContracts: `/api/{0}/main/unit/sale/contracts?id={1}`,
-    unit_supply_contracts: `/api/{0}/main/unit/supply/contracts?id={1}`,
+    unit_saleContracts: "/api/{0}/main/unit/sale/contracts?id={1}",
+    unit_supply_contracts: "/api/{0}/main/unit/supply/contracts?id={1}",
     // глобальные виртовские
-    tradeGoods: `/api/{0}/main/product/goods`,
-    cities: `/api/{0}/main/geo/city/browse`,
-    regions: `/api/{0}/main/geo/region/browse`,
-    retail_products: `/api/{0}/main/product/goods`,
+    tradeGoods: "/api/{0}/main/product/goods",
+    cities: "/api/{0}/main/geo/city/browse",
+    regions: "/api/{0}/main/geo/region/browse",
+    retail_products: "/api/{0}/main/product/goods",
 };
 /**
  * По заданной ссылке и хтмл определяет находимся ли мы внутри юнита или нет.
@@ -827,41 +870,43 @@ let UrlApi_tpl = {
  * @param $html
  * @param my своя компания или нет?
  */
-function isUnit(urlPath, $html, my = true) {
+function isUnit(urlPath, $html, my) {
+    if (my === void 0) { my = true; }
     if (!urlPath || !$html) {
         urlPath = document.location.pathname;
         $html = $(document);
     }
     // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
     // https://virtonomica.ru/olga/main/unit/view/6452212/*
-    let urlOk = Url_rx.unit_any.test(urlPath);
+    var urlOk = Url_rx.unit_any.test(urlPath);
     if (!urlOk)
         return false;
     // но у своего юнита есть слева в табах стрелочка со ссылью на компанию с тем же айди что и ссыль на дашборду. А для чужого нет ее и табов
-    let urlCompany = nullCheck($html.find("a[data-name='itour-tab-company-view'").attr("href"));
+    var urlCompany = nullCheck($html.find("a[data-name='itour-tab-company-view'").attr("href"));
     //let urlOffice = $html.find("div.officePlace a").attr("href");
-    let urlDash = nullCheck($html.find("a.dashboard").attr("href"));
+    var urlDash = nullCheck($html.find("a.dashboard").attr("href"));
     if (urlCompany.length === 0 || urlDash.length === 0)
         throw new Error("Ссылка на юзерлист или дашборду не может быть найдена");
-    let isMy = (`${urlCompany}/dashboard` === urlDash);
+    var isMy = (urlCompany + "/dashboard" === urlDash);
     return my ? isMy : !isMy;
 }
-function isUnitOld(urlPath, $html, my = true) {
+function isUnitOld(urlPath, $html, my) {
+    if (my === void 0) { my = true; }
     if (!urlPath || !$html) {
         urlPath = document.location.pathname;
         $html = $(document);
     }
     // для ситуации когда мы внутри юнита характерно что всегда ссылка вида 
     // https://virtonomica.ru/olga/main/unit/view/6452212/*
-    let urlOk = Url_rx.unit_any.test(urlPath);
+    var urlOk = Url_rx.unit_any.test(urlPath);
     if (!urlOk)
         return false;
     // но у своего юнита ссыль на офис имеет тот же айди что и ссыль на дашборду. А для чужого нет
-    let urlOffice = $html.find("div.officePlace a").attr("href");
-    let urlDash = $html.find("a.dashboard").attr("href");
+    var urlOffice = $html.find("div.officePlace a").attr("href");
+    var urlDash = $html.find("a.dashboard").attr("href");
     if (urlOffice.length === 0 || urlDash.length === 0)
         throw new Error("Ссылка на офис или дашборду не может быть найдена");
-    let isMy = (`${urlOffice}/dashboard` === urlDash);
+    var isMy = (urlOffice + "/dashboard" === urlDash);
     return my ? isMy : !isMy;
 }
 /**
@@ -874,8 +919,8 @@ function isMyUnitList() {
         return false;
     // запрос id может вернуть ошибку если мы на window ссылке. значит точно у чужого васи
     try {
-        let id = nullCheck(parseCompanyId(document));
-        let urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
+        var id = nullCheck(parseCompanyId(document));
+        var urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
         if (urlId[0] != id)
             return false;
     }
@@ -894,8 +939,8 @@ function isOthersUnitList() {
         return false;
     try {
         // для чужого списка будет разный айди в дашборде и в ссылке
-        let id = nullCheck(parseCompanyId(document));
-        let urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
+        var id = nullCheck(parseCompanyId(document));
+        var urlId = extractIntPositive(document.location.pathname); // полюбому число есть иначе регекс не пройдет
         if (urlId[0] === id)
             return false;
     }
@@ -905,11 +950,12 @@ function isOthersUnitList() {
     }
     return true;
 }
-function isUnitMain(urlPath, html, my = true) {
-    let ok = Url_rx.unit_main.test(urlPath);
+function isUnitMain(urlPath, html, my) {
+    if (my === void 0) { my = true; }
+    var ok = Url_rx.unit_main.test(urlPath);
     if (!ok)
         return false;
-    let hasTabs = $(html).find("ul.tabu").length > 0;
+    var hasTabs = $(html).find("ul.tabu").length > 0;
     if (my)
         return hasTabs;
     else
@@ -928,10 +974,11 @@ function isUnitFinanceReport() {
 function isCompanyRepByUnit() {
     return Url_rx.comp_fin_rep_byunit.test(document.location.pathname);
 }
-function hasTradeHall(html, my = true) {
-    let $html = $(html);
+function hasTradeHall(html, my) {
+    if (my === void 0) { my = true; }
+    var $html = $(html);
     if (my) {
-        let $a = $html.find("ul.tabu a[href$=trading_hall]");
+        var $a = $html.find("ul.tabu a[href$=trading_hall]");
         if ($a.length > 1)
             throw new Error("Найдено больше одной ссылки на трейдхолл.");
         return $a.length === 1;
@@ -952,10 +999,10 @@ function hasTradeHall(html, my = true) {
  * @param tagname имя тэга. tr, td, span и так далее
  */
 function closestByTagName(items, tagname) {
-    let tag = tagname.toUpperCase();
-    let found = [];
-    for (let i = 0; i < items.length; i++) {
-        let node = items[i];
+    var tag = tagname.toUpperCase();
+    var found = [];
+    for (var i = 0; i < items.length; i++) {
+        var node = items[i];
         while ((node = node.parentNode) && node.nodeName != tag) { }
         ;
         if (node)
@@ -970,10 +1017,10 @@ function closestByTagName(items, tagname) {
  */
 function getOnlyText(item) {
     // просто children() не отдает текстовые ноды.
-    let $childrenNodes = item.contents();
-    let res = [];
-    for (let i = 0; i < $childrenNodes.length; i++) {
-        let el = $childrenNodes.get(i);
+    var $childrenNodes = item.contents();
+    var res = [];
+    for (var i = 0; i < $childrenNodes.length; i++) {
+        var el = $childrenNodes.get(i);
         if (el.nodeType === 3)
             res.push($(el).text()); // так как в разных браузерах текст запрашивается по разному, 
         // универсальный способ запросить через jquery
@@ -986,9 +1033,9 @@ function getOnlyText(item) {
  * @param selector
  */
 function oneOrError($item, selector) {
-    let $one = $item.find(selector);
+    var $one = $item.find(selector);
     if ($one.length != 1)
-        throw new Error(`Найдено ${$one.length} элементов вместо 1 для селектора ${selector}`);
+        throw new Error("\u041D\u0430\u0439\u0434\u0435\u043D\u043E " + $one.length + " \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u043E\u0432 \u0432\u043C\u0435\u0441\u0442\u043E 1 \u0434\u043B\u044F \u0441\u0435\u043B\u0435\u043A\u0442\u043E\u0440\u0430 " + selector);
     return $one;
 }
 // AJAX ----------------------------------------
@@ -1024,55 +1071,58 @@ function doRepage(pages, $html) {
  * @param timeout таймаут между попытками
  * @param beforeGet вызывается перед каждым новым запросом. То есть число вызовов равно числу запросов. Каждый раз вызывается с урлом которые запрашивается.
  */
-function tryGet_async(url, retries = 10, timeout = 1000, beforeGet, onError) {
-    return __awaiter(this, void 0, void 0, function* () {
-        //logDebug(`tryGet_async: ${url}`);
-        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
-        let $deffered = $.Deferred();
-        if (beforeGet) {
-            try {
-                beforeGet(url);
-            }
-            catch (err) {
-                logDebug("beforeGet вызвал исключение", err);
-            }
-        }
-        $.ajax({
-            url: url,
-            type: "GET",
-            xhrFields: { withCredentials: true },
-            success: (data, status, jqXHR) => $deffered.resolve(data),
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (onError) {
-                    try {
-                        onError(url);
-                    }
-                    catch (err) {
-                        logDebug("onError вызвал исключение", err);
-                    }
+function tryGet_async(url, retries, timeout, beforeGet, onError) {
+    if (retries === void 0) { retries = 10; }
+    if (timeout === void 0) { timeout = 1000; }
+    return __awaiter(this, void 0, void 0, function () {
+        var $deffered;
+        return __generator(this, function (_a) {
+            $deffered = $.Deferred();
+            if (beforeGet) {
+                try {
+                    beforeGet(url);
                 }
-                retries--;
-                if (retries <= 0) {
-                    let err = new Error(`can't get ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
-                    $deffered.reject(err);
-                    return;
+                catch (err) {
+                    logDebug("beforeGet вызвал исключение", err);
                 }
-                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
-                let _this = this;
-                setTimeout(() => {
-                    if (beforeGet) {
+            }
+            $.ajax({
+                url: url,
+                type: "GET",
+                xhrFields: { withCredentials: true },
+                success: function (data, status, jqXHR) { return $deffered.resolve(data); },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (onError) {
                         try {
-                            beforeGet(url);
+                            onError(url);
                         }
                         catch (err) {
-                            logDebug("beforeGet вызвал исключение", err);
+                            logDebug("onError вызвал исключение", err);
                         }
                     }
-                    $.ajax(_this);
-                }, timeout);
-            }
+                    retries--;
+                    if (retries <= 0) {
+                        var err = new Error("can't get " + this.url + "\nstatus: " + jqXHR.status + "\ntextStatus: " + jqXHR.statusText + "\nerror: " + errorThrown);
+                        $deffered.reject(err);
+                        return;
+                    }
+                    //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                    var _this = this;
+                    setTimeout(function () {
+                        if (beforeGet) {
+                            try {
+                                beforeGet(url);
+                            }
+                            catch (err) {
+                                logDebug("beforeGet вызвал исключение", err);
+                            }
+                        }
+                        $.ajax(_this);
+                    }, timeout);
+                }
+            });
+            return [2 /*return*/, $deffered.promise()];
         });
-        return $deffered.promise();
     });
 }
 /**
@@ -1080,7 +1130,7 @@ function tryGet_async(url, retries = 10, timeout = 1000, beforeGet, onError) {
  * @param jsonStr
  */
 function parseJSON(jsonStr) {
-    let obj = JSON.parse(jsonStr, (k, v) => {
+    var obj = JSON.parse(jsonStr, function (k, v) {
         if (v === "t")
             return true;
         if (v === "f")
@@ -1092,59 +1142,63 @@ function parseJSON(jsonStr) {
 /**
  * Аналогично обычному методу tryGet_async правда ожидает только json и конвертает по ходу дела числа в числа если они идут строкой
  */
-function tryGetJSON_async(url, retries = 10, timeout = 1000, beforeGet, onError) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
-        let $deffered = $.Deferred();
-        if (beforeGet) {
-            try {
-                beforeGet(url);
-            }
-            catch (err) {
-                logDebug("beforeGet вызвал исключение", err);
-            }
-        }
-        $.ajax({
-            url: url,
-            type: "GET",
-            cache: false,
-            dataType: "text",
-            xhrFields: { withCredentials: true },
-            success: (jsonStr, status, jqXHR) => {
-                let obj = parseJSON(jsonStr);
-                $deffered.resolve(obj);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (onError) {
-                    try {
-                        onError(url);
-                    }
-                    catch (err) {
-                        logDebug("onError вызвал исключение", err);
-                    }
+function tryGetJSON_async(url, retries, timeout, beforeGet, onError) {
+    if (retries === void 0) { retries = 10; }
+    if (timeout === void 0) { timeout = 1000; }
+    return __awaiter(this, void 0, void 0, function () {
+        var $deffered;
+        return __generator(this, function (_a) {
+            $deffered = $.Deferred();
+            if (beforeGet) {
+                try {
+                    beforeGet(url);
                 }
-                retries--;
-                if (retries <= 0) {
-                    let err = new Error(`can't get ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
-                    $deffered.reject(err);
-                    return;
+                catch (err) {
+                    logDebug("beforeGet вызвал исключение", err);
                 }
-                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
-                let _this = this;
-                setTimeout(() => {
-                    if (beforeGet) {
+            }
+            $.ajax({
+                url: url,
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                xhrFields: { withCredentials: true },
+                success: function (jsonStr, status, jqXHR) {
+                    var obj = parseJSON(jsonStr);
+                    $deffered.resolve(obj);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (onError) {
                         try {
-                            beforeGet(url);
+                            onError(url);
                         }
                         catch (err) {
-                            logDebug("beforeGet вызвал исключение", err);
+                            logDebug("onError вызвал исключение", err);
                         }
                     }
-                    $.ajax(_this);
-                }, timeout);
-            }
+                    retries--;
+                    if (retries <= 0) {
+                        var err = new Error("can't get " + this.url + "\nstatus: " + jqXHR.status + "\ntextStatus: " + jqXHR.statusText + "\nerror: " + errorThrown);
+                        $deffered.reject(err);
+                        return;
+                    }
+                    //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                    var _this = this;
+                    setTimeout(function () {
+                        if (beforeGet) {
+                            try {
+                                beforeGet(url);
+                            }
+                            catch (err) {
+                                logDebug("beforeGet вызвал исключение", err);
+                            }
+                        }
+                        $.ajax(_this);
+                    }, timeout);
+                }
+            });
+            return [2 /*return*/, $deffered.promise()];
         });
-        return $deffered.promise();
     });
 }
 /**
@@ -1157,55 +1211,59 @@ function tryGetJSON_async(url, retries = 10, timeout = 1000, beforeGet, onError)
  * @param timeout
  * @param beforePost
  */
-function tryPost_async(url, form, retries = 10, timeout = 1000, beforePost, onError) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
-        let $deferred = $.Deferred();
-        if (beforePost) {
-            try {
-                beforePost(url);
-            }
-            catch (err) {
-                logDebug("beforePost вызвал исключение", err);
-            }
-        }
-        $.ajax({
-            url: url,
-            data: form,
-            type: "POST",
-            xhrFields: { withCredentials: true },
-            success: (data, status, jqXHR) => $deferred.resolve(data),
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (onError) {
-                    try {
-                        onError(url);
-                    }
-                    catch (err) {
-                        logDebug("onError вызвал исключение", err);
-                    }
+function tryPost_async(url, form, retries, timeout, beforePost, onError) {
+    if (retries === void 0) { retries = 10; }
+    if (timeout === void 0) { timeout = 1000; }
+    return __awaiter(this, void 0, void 0, function () {
+        var $deferred;
+        return __generator(this, function (_a) {
+            $deferred = $.Deferred();
+            if (beforePost) {
+                try {
+                    beforePost(url);
                 }
-                retries--;
-                if (retries <= 0) {
-                    let err = new Error(`can't post ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
-                    $deferred.reject(err);
-                    return;
+                catch (err) {
+                    logDebug("beforePost вызвал исключение", err);
                 }
-                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
-                let _this = this;
-                setTimeout(() => {
-                    if (beforePost) {
+            }
+            $.ajax({
+                url: url,
+                data: form,
+                type: "POST",
+                xhrFields: { withCredentials: true },
+                success: function (data, status, jqXHR) { return $deferred.resolve(data); },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (onError) {
                         try {
-                            beforePost(url);
+                            onError(url);
                         }
                         catch (err) {
-                            logDebug("beforePost вызвал исключение", err);
+                            logDebug("onError вызвал исключение", err);
                         }
                     }
-                    $.ajax(_this);
-                }, timeout);
-            }
+                    retries--;
+                    if (retries <= 0) {
+                        var err = new Error("can't post " + this.url + "\nstatus: " + jqXHR.status + "\ntextStatus: " + jqXHR.statusText + "\nerror: " + errorThrown);
+                        $deferred.reject(err);
+                        return;
+                    }
+                    //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                    var _this = this;
+                    setTimeout(function () {
+                        if (beforePost) {
+                            try {
+                                beforePost(url);
+                            }
+                            catch (err) {
+                                logDebug("beforePost вызвал исключение", err);
+                            }
+                        }
+                        $.ajax(_this);
+                    }, timeout);
+                }
+            });
+            return [2 /*return*/, $deferred.promise()];
         });
-        return $deferred.promise();
     });
 }
 /**
@@ -1218,64 +1276,72 @@ function tryPost_async(url, form, retries = 10, timeout = 1000, beforePost, onEr
  * @param timeout
  * @param beforePost
  */
-function tryPostJSON_async(url, data, retries = 10, timeout = 1000, beforePost, onError) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // сам метод пришлось делать Promise<any> потому что string | Error не работало какого то хуя не знаю. Из за стрик нулл чек
-        let $deferred = $.Deferred();
-        if (beforePost) {
-            try {
-                beforePost(url);
-            }
-            catch (err) {
-                logDebug("beforePost вызвал исключение", err);
-            }
-        }
-        $.ajax({
-            url: url,
-            data: data,
-            type: "POST",
-            dataType: 'JSON',
-            xhrFields: { withCredentials: true },
-            success: (data, status, jqXHR) => $deferred.resolve(data),
-            error: function (jqXHR, textStatus, errorThrown) {
-                if (onError) {
-                    try {
-                        onError(url);
-                    }
-                    catch (err) {
-                        logDebug("onError вызвал исключение", err);
-                    }
+function tryPostJSON_async(url, data, retries, timeout, beforePost, onError) {
+    if (retries === void 0) { retries = 10; }
+    if (timeout === void 0) { timeout = 1000; }
+    return __awaiter(this, void 0, void 0, function () {
+        var $deferred;
+        return __generator(this, function (_a) {
+            $deferred = $.Deferred();
+            if (beforePost) {
+                try {
+                    beforePost(url);
                 }
-                retries--;
-                if (retries <= 0) {
-                    let err = new Error(`can't post ${this.url}\nstatus: ${jqXHR.status}\ntextStatus: ${jqXHR.statusText}\nerror: ${errorThrown}`);
-                    $deferred.reject(err);
-                    return;
+                catch (err) {
+                    logDebug("beforePost вызвал исключение", err);
                 }
-                //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
-                let _this = this;
-                setTimeout(() => {
-                    if (beforePost) {
+            }
+            $.ajax({
+                url: url,
+                data: data,
+                type: "POST",
+                dataType: 'JSON',
+                xhrFields: { withCredentials: true },
+                success: function (data, status, jqXHR) { return $deferred.resolve(data); },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (onError) {
                         try {
-                            beforePost(url);
+                            onError(url);
                         }
                         catch (err) {
-                            logDebug("beforePost вызвал исключение", err);
+                            logDebug("onError вызвал исключение", err);
                         }
                     }
-                    $.ajax(_this);
-                }, timeout);
-            }
+                    retries--;
+                    if (retries <= 0) {
+                        var err = new Error("can't post " + this.url + "\nstatus: " + jqXHR.status + "\ntextStatus: " + jqXHR.statusText + "\nerror: " + errorThrown);
+                        $deferred.reject(err);
+                        return;
+                    }
+                    //logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
+                    var _this = this;
+                    setTimeout(function () {
+                        if (beforePost) {
+                            try {
+                                beforePost(url);
+                            }
+                            catch (err) {
+                                logDebug("beforePost вызвал исключение", err);
+                            }
+                        }
+                        $.ajax(_this);
+                    }, timeout);
+                }
+            });
+            return [2 /*return*/, $deferred.promise()];
         });
-        return $deferred.promise();
     });
 }
 // COMMON ----------------------------------------
-let $xioDebug = false;
-function logDebug(msg, ...args) {
+var $xioDebug = false;
+function logDebug(msg) {
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
     if (!$xioDebug)
         return;
-    console.log(msg, ...args);
+    console.log.apply(console, [msg].concat(args));
 }
 /**
  * определяет есть ли на странице несколько страниц которые нужно перелистывать или все влазит на одну
@@ -1287,7 +1353,7 @@ function hasPages($html) {
     if ($html == null)
         $html = $(document);
     // там не только кнопки страниц но еще и текст Страницы в первом li поэтому > 2
-    let $pageLinks = $html.find('ul.pager_list li');
+    var $pageLinks = $html.find('ul.pager_list li');
     return $pageLinks.length > 2;
 }
 /**
@@ -1295,14 +1361,15 @@ function hasPages($html) {
  * @param $html
  * @param pages число элементов на страницу которое установить
  */
-function getRepageUrl($html, pages = 10000) {
+function getRepageUrl($html, pages) {
+    if (pages === void 0) { pages = 10000; }
     if (!hasPages($html))
         return null;
     // снизу всегда несколько кнопок для числа страниц, НО одна может быть уже нажата мы не знаем какая
     // берем просто любую ненажатую, извлекаем ее текст, на у далее в ссылке всегда
     // есть число такое же как текст в кнопке. Заменяем на свое и все ок.
-    let $pager = $html.find('ul.pager_options li').has("a").last();
-    let num = $pager.text().trim();
+    var $pager = $html.find('ul.pager_options li').has("a").last();
+    var num = $pager.text().trim();
     return $pager.find('a').attr('href').replace(num, pages.toString());
 }
 /**
@@ -1315,13 +1382,15 @@ function trimDateDict(dict, maxItems) {
     // удалим лишние оставив maxItems дней истории
     if (Object.keys(dict).length <= maxItems)
         return;
-    let delDates = Object.keys(dict)
-        .map(v => dateFromShort(v))
-        .sort((a, b) => b.getDate() - a.getTime())
-        .map(v => dateToShort(v))
+    var delDates = Object.keys(dict)
+        .map(function (v) { return dateFromShort(v); })
+        .sort(function (a, b) { return b.getDate() - a.getTime(); })
+        .map(function (v) { return dateToShort(v); })
         .slice(maxItems);
-    for (let d of delDates)
+    for (var _i = 0, delDates_1 = delDates; _i < delDates_1.length; _i++) {
+        var d = delDates_1[_i];
         delete dict[d];
+    }
 }
 // SAVE & LOAD ------------------------------------
 /**
@@ -1337,7 +1406,7 @@ function buildStoreKey(realm, code, subid) {
         throw new RangeError("Параметр realm не может быть равен '' ");
     if (subid != null && realm == null)
         throw new RangeError("Как бы нет смысла указывать subid и не указывать realm");
-    let res = "^*"; // уникальная ботва которую добавляем ко всем своим данным
+    var res = "^*"; // уникальная ботва которую добавляем ко всем своим данным
     if (realm != null)
         res += "_" + realm;
     if (subid != null)
@@ -1357,14 +1426,14 @@ function splitStoreKey(key) {
     // ^*_rm
     // ^*_olga_rm
     // ^*_olga_1234_rm
-    let rx = /^\^\*_(?:([a-z]+)_){0,1}(?:(\d+)_){0,1}([a-z]+){1}$/i;
-    let res = rx.exec(key);
+    var rx = /^\^\*_(?:([a-z]+)_){0,1}(?:(\d+)_){0,1}([a-z]+){1}$/i;
+    var res = rx.exec(key);
     if (res == null)
-        throw new Error(`Строка ${key} не является допустимым ключем хранилища.`);
+        throw new Error("\u0421\u0442\u0440\u043E\u043A\u0430 " + key + " \u043D\u0435 \u044F\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0434\u043E\u043F\u0443\u0441\u0442\u0438\u043C\u044B\u043C \u043A\u043B\u044E\u0447\u0435\u043C \u0445\u0440\u0430\u043D\u0438\u043B\u0438\u0449\u0430.");
     // так как часть групп может отсутствовать то в выходном массиве в этих местах будет undefined
-    let realm = res[1] == null ? null : res[1].trim();
-    let subid = res[2] == null ? null : parseInt(res[2]);
-    let code = res[3].trim();
+    var realm = res[1] == null ? null : res[1].trim();
+    var subid = res[2] == null ? null : parseInt(res[2]);
+    var code = res[3].trim();
     return [realm, subid, code];
 }
 /**
@@ -1373,14 +1442,14 @@ function splitStoreKey(key) {
  * @param storeKey код ключа sh, udd, vh итд
  */
 function getStoredUnitsKeys(realm, storeKey) {
-    let res = [];
-    for (let key in localStorage) {
+    var res = [];
+    for (var key in localStorage) {
         // если в ключе нет числа, не брать его
-        let m = extractIntPositive(key);
+        var m = extractIntPositive(key);
         if (m == null)
             continue;
         // если ключик не совпадает со старым ключем для посетителей
-        let subid = m[0];
+        var subid = m[0];
         if (key !== buildStoreKey(realm, storeKey, subid))
             continue;
         res.push(key);
@@ -1393,14 +1462,14 @@ function getStoredUnitsKeys(realm, storeKey) {
  * @param storeKey код ключа sh, udd, vh итд
  */
 function getStoredUnitsKeysA(realm, storeKey) {
-    let res = [];
-    for (let key in localStorage) {
+    var res = [];
+    for (var key in localStorage) {
         // если в ключе нет числа, не брать его
-        let m = extractIntPositive(key);
+        var m = extractIntPositive(key);
         if (m == null)
             continue;
         // если ключик не совпадает со старым ключем для посетителей
-        let subid = m[0];
+        var subid = m[0];
         if (key !== buildStoreKey(realm, storeKey, subid))
             continue;
         res.push([key, subid]);
@@ -1419,33 +1488,35 @@ function Export($place, test) {
         $place.find("#txtExport").remove();
         return false;
     }
-    let $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
-    let string = "";
-    for (let key in localStorage) {
+    var $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
+    var string = "";
+    for (var key in localStorage) {
         if (!test(key))
             continue;
         if (string.length > 0)
             string += "|";
-        string += `${key}=${localStorage[key]}`;
+        string += key + "=" + localStorage[key];
     }
     $txt.text(string);
     $place.append($txt);
     return true;
 }
-function ExportA($place, keys, converter, delim = "\n") {
+function ExportA($place, keys, converter, delim) {
+    if (delim === void 0) { delim = "\n"; }
     if ($place.length <= 0)
         return false;
     if ($place.find("#txtExport").length > 0) {
         $place.find("#txtExport").remove();
         return false;
     }
-    let $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
-    let exportStr = "";
-    for (let key of keys) {
+    var $txt = $('<textarea id="txtExport" style="display:block;width: 800px; height: 200px"></textarea>');
+    var exportStr = "";
+    for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+        var key = keys_1[_i];
         if (exportStr.length > 0)
             exportStr += delim;
-        let item = converter == null ? localStorage[key] : converter(localStorage[key]);
-        exportStr += `${key}=${item}`;
+        var item = converter == null ? localStorage[key] : converter(localStorage[key]);
+        exportStr += key + "=" + item;
     }
     $txt.text(exportStr);
     $place.append($txt);
@@ -1465,39 +1536,40 @@ function Import($place) {
         $place.find("#saveImport").remove();
         return false;
     }
-    let $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
-    let $saveBtn = $(`<input id="saveImport" type=button disabled="true" value="Save!">`);
-    $txt.on("input propertychange", (event) => $saveBtn.prop("disabled", false));
-    $saveBtn.on("click", (event) => {
-        let items = $txt.val().split("|"); // элементы вида Ключ=значение
-        logDebug(`загружено ${items.length} элементов`);
+    var $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
+    var $saveBtn = $("<input id=\"saveImport\" type=button disabled=\"true\" value=\"Save!\">");
+    $txt.on("input propertychange", function (event) { return $saveBtn.prop("disabled", false); });
+    $saveBtn.on("click", function (event) {
+        var items = $txt.val().split("|"); // элементы вида Ключ=значение
+        logDebug("\u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043D\u043E " + items.length + " \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u043E\u0432");
         try {
-            items.forEach((val, i, arr) => {
-                let item = val.trim();
+            items.forEach(function (val, i, arr) {
+                var item = val.trim();
                 if (item.length <= 0)
-                    throw new Error(`получили пустую строку для элемента ${i}, невозможно импортировать.`);
-                let kvp = item.split("="); // пара ключ значение
+                    throw new Error("\u043F\u043E\u043B\u0443\u0447\u0438\u043B\u0438 \u043F\u0443\u0441\u0442\u0443\u044E \u0441\u0442\u0440\u043E\u043A\u0443 \u0434\u043B\u044F \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u0430 " + i + ", \u043D\u0435\u0432\u043E\u0437\u043C\u043E\u0436\u043D\u043E \u0438\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C.");
+                var kvp = item.split("="); // пара ключ значение
                 if (kvp.length !== 2)
                     throw new Error("Должен быть только ключ и значение а по факту не так. " + item);
-                let storeKey = kvp[0].trim();
-                let storeVal = kvp[1].trim();
+                var storeKey = kvp[0].trim();
+                var storeVal = kvp[1].trim();
                 if (storeKey.length <= 0 || storeVal.length <= 0)
                     throw new Error("Длина ключа или данных равна 0 " + item);
                 if (localStorage[storeKey] != null)
-                    logDebug(`Ключ ${storeKey} существует. Перезаписываем.`);
+                    logDebug("\u041A\u043B\u044E\u0447 " + storeKey + " \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442. \u041F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u043C.");
                 localStorage[storeKey] = storeVal;
             });
             alert("импорт завершен");
         }
         catch (err) {
-            let msg = err.message;
+            var msg = err.message;
             alert(msg);
         }
     });
     $place.append($txt).append($saveBtn);
     return true;
 }
-function ImportA($place, converter, delim = "\n") {
+function ImportA($place, converter, delim) {
+    if (delim === void 0) { delim = "\n"; }
     if ($place.length <= 0)
         return false;
     if ($place.find("#txtImport").length > 0) {
@@ -1505,32 +1577,32 @@ function ImportA($place, converter, delim = "\n") {
         $place.find("#saveImport").remove();
         return false;
     }
-    let $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
-    let $saveBtn = $(`<input id="saveImport" type=button disabled="true" value="Save!">`);
-    $txt.on("input propertychange", (event) => $saveBtn.prop("disabled", false));
-    $saveBtn.on("click", (event) => {
-        let items = $txt.val().split(delim); // элементы вида Ключ=значение
-        logDebug(`загружено ${items.length} элементов`);
+    var $txt = $('<textarea id="txtImport" style="display:block;width: 800px; height: 200px"></textarea>');
+    var $saveBtn = $("<input id=\"saveImport\" type=button disabled=\"true\" value=\"Save!\">");
+    $txt.on("input propertychange", function (event) { return $saveBtn.prop("disabled", false); });
+    $saveBtn.on("click", function (event) {
+        var items = $txt.val().split(delim); // элементы вида Ключ=значение
+        logDebug("\u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043D\u043E " + items.length + " \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u043E\u0432");
         try {
-            items.forEach((val, i, arr) => {
-                let item = val.trim();
+            items.forEach(function (val, i, arr) {
+                var item = val.trim();
                 if (item.length <= 0)
-                    throw new Error(`получили пустую строку для элемента ${i}, невозможно импортировать.`);
-                let kvp = item.split("="); // пара ключ значение
+                    throw new Error("\u043F\u043E\u043B\u0443\u0447\u0438\u043B\u0438 \u043F\u0443\u0441\u0442\u0443\u044E \u0441\u0442\u0440\u043E\u043A\u0443 \u0434\u043B\u044F \u044D\u043B\u0435\u043C\u0435\u043D\u0442\u0430 " + i + ", \u043D\u0435\u0432\u043E\u0437\u043C\u043E\u0436\u043D\u043E \u0438\u043C\u043F\u043E\u0440\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C.");
+                var kvp = item.split("="); // пара ключ значение
                 if (kvp.length !== 2)
                     throw new Error("Должен быть только ключ и значение а по факту не так. " + item);
-                let storeKey = kvp[0].trim();
-                let storeVal = kvp[1].trim();
+                var storeKey = kvp[0].trim();
+                var storeVal = kvp[1].trim();
                 if (storeKey.length <= 0 || storeVal.length <= 0)
                     throw new Error("Длина ключа или данных равна 0 " + item);
                 if (localStorage[storeKey] != null)
-                    logDebug(`Ключ ${storeKey} существует. Перезаписываем.`);
+                    logDebug("\u041A\u043B\u044E\u0447 " + storeKey + " \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u0435\u0442. \u041F\u0435\u0440\u0435\u0437\u0430\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u043C.");
                 localStorage[storeKey] = converter == null ? storeVal : converter(storeVal);
             });
             alert("импорт завершен");
         }
         catch (err) {
-            let msg = err.message;
+            var msg = err.message;
             alert(msg);
         }
     });
