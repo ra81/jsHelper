@@ -4,9 +4,9 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 /*
@@ -182,31 +182,33 @@ class Counter {
         return this._count;
     }
 }
-function dictKeysN(dict) {
-    return Object.keys(dict).map((v, i, arr) => parseInt(v));
+function keysN(dict) {
+    return Object.keys(dict).map(k => parseInt(k));
 }
-function dictKeys(dict) {
-    return Object.keys(dict);
+function keys(obj) {
+    return Object.keys(obj);
 }
-function dictValues(dict) {
+function valuesN(dict) {
     let res = [];
     for (let key in dict)
         res.push(dict[key]);
     return res;
 }
-function dictValuesN(dict) {
+function values(dict) {
     let res = [];
     for (let key in dict)
         res.push(dict[key]);
     return res;
 }
 /**
- * Проверяет наличие в словаре ключей. Шорт алиас для удобства.
+ * Проверяет любой объект на наличие свойств видимых. Удобен для словарей.
  * Если словарь не задать, вывалит исключение
- * @param dict проверяемый словарь
+ * @param obj
  */
-function isEmpty(dict) {
-    return Object.keys(dict).length === 0; // исключение на null
+function isEmpty(obj) {
+    if (obj == null)
+        throw new Error("obj == null");
+    return Object.keys(obj).length === 0;
 }
 /**
  * Конвертит словарь в простую текстовую строку вида "key:val, key1:val1"
@@ -447,13 +449,16 @@ function numberfy(str) {
  * @param value строка являющая собой число больше minVal
  * @param minVal ограничение снизу. Число.
  * @param infinity разрешена ли бесконечность
+ * @param minInclude если включен то мин граница разрешается, иначе НЕ разрешается
  */
-function numberfyOrError(str, minVal = 0, infinity = false) {
+function numberfyOrError(str, minVal = 0, infinity = false, minInclude = false) {
     let n = numberfy(str);
     if (!infinity && (n === Number.POSITIVE_INFINITY || n === Number.NEGATIVE_INFINITY))
         throw new RangeError("Получили бесконечность, что запрещено.");
-    if (n <= minVal)
-        throw new RangeError("Число должно быть > " + minVal);
+    if (minInclude && n < minVal)
+        throw new RangeError(`Число ${n} должно быть >= ${minVal}`);
+    if (!minInclude && n <= minVal)
+        throw new RangeError(`Число ${n} должно быть > ${minVal}`);
     return n;
 }
 /**
@@ -665,11 +670,13 @@ function nullCheck(val) {
         throw new Error(`nullCheck Error`);
     return val;
 }
+/** проверяет чтобы value было стопудово числом а не другой хуйней */
 function numberCheck(value) {
-    if (typeof (value) != "number")
+    if (isNaN(value) || value == Infinity || typeof (value) != "number")
         throw new Error(`${value} не является числом.`);
     return value;
 }
+/** проверяет чтобы value было стопудово строкой а не другой хуйней */
 function stringCheck(value) {
     if (typeof (value) != "string")
         throw new Error(`${value} не является строкой.`);
@@ -682,37 +689,59 @@ function stringCheck(value) {
 function sleep_async(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-// РЕГУЛЯРКИ ДЛЯ ССЫЛОК ------------------------------------
-// для 1 юнита
-// 
-//let url_unit_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+/i;           // внутри юнита. любая страница
-//let url_unit_main_rx = /\/\w+\/(?:main|window)\/unit\/view\/\d+\/?$/i;     // главная юнита
-//let url_unit_finrep_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/finans_report(\/graphical)?$/i; // финанс отчет
-//let url_unit_finrep_by_prod_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/finans_report\/by_production\/?$/i; // финанс отчет по товарам
-//let url_trade_hall_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/trading_hall\/?/i;    // торговый зал
-//let url_price_history_rx = /\/[a-z]+\/(?:main|window)\/unit\/view\/\d+\/product_history\/\d+\/?/i; // история продаж в магазине по товару
-//let url_supply_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/supply\/?/i;    // снабжение
-//let url_sale_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/sale\/?/i;        // продажа склад/завод
-//let url_ads_rx = /\/[a-z]+\/main\/unit\/view\/\d+\/virtasement$/i;  // реклама
-//let url_education_rx = /\/[a-z]+\/window\/unit\/employees\/education\/\d+\/?/i; // обучение
-//let url_supply_create_rx = /\/[a-z]+\/unit\/supply\/create\/\d+\/step2\/?$/i;  // заказ товара в маг, или склад. в общем стандартный заказ товара
-//let url_equipment_rx = /\/[a-z]+\/window\/unit\/equipment\/\d+\/?$/i;   // заказ оборудования на завод, лабу или куда то еще
-// для компании
-// 
-//let url_unit_list_rx = /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i;     // список юнитов. Работает и для списка юнитов чужой компании
-//let url_rep_finance_byunit = /\/[a-z]+\/main\/company\/view\/\d+\/finance_report\/by_units(?:\/.*)?$/i;  // отчет по подразделениями из отчетов
-//let url_rep_ad = /\/[a-z]+\/main\/company\/view\/\d+\/marketing_report\/by_advertising_program$/i;  // отчет по рекламным акциям
-//let url_manag_equip_rx = /\/[a-z]+\/window\/management_units\/equipment\/(?:buy|repair)$/i;     // в окне управления юнитами групповой ремонт или закупка оборудования
-//let url_manag_empl_rx = /\/[a-z]+\/main\/company\/view\/\d+\/unit_list\/employee\/?$/i;     // управление - персонал
-// для для виртономики
-// 
-//let url_global_products_rx = /[a-z]+\/main\/globalreport\/marketing\/by_products\/\d+\/?$/i; // глобальный отчет по продукции из аналитики
-//let url_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/products$/i;   // страница со всеми товарами игры
-//let url_trade_products_rx = /\/[a-z]+\/main\/common\/main_page\/game_info\/trading$/i;   // страница с торгуемыми товарами
-//let url_city_retail_report_rx = /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i; // розничный отчет по конкретному товару
-//let url_products_size_rx = /\/[a-z]+\/main\/industry\/unit_type\/info\/2011\/volume\/?/i;  // размеры продуктов на склада
-//let url_country_duties_rx = /\/[a-z]+\/main\/geo\/countrydutylist\/\d+\/?/i;    // таможенные пошлины и ИЦ
-// let url_tm_info_rx = /\/[a-z]+\/main\/globalreport\/tm\/info/i;    // брендовые товары список
+let commonUrls = {
+    /** все поставщики товара в виртономике глобально [реалм, айди товара] */
+    virt_product_suppliers: {
+        tpl: `/{0}/main/globalreport/marketing/by_products/{1}/`,
+        rx: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i
+    },
+    /** розничный отчет по городу для товара [реалм,pid,countryID, regionID, cityID]*/
+    virt_city_retail_report: {
+        tpl: `/{0}/window/globalreport/marketing/by_trade_at_cities/{1}/{2}/{3}/{4}`,
+        rx: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
+    },
+    /** общий список всех типов предприятий в игре [реалм]*/
+    virt_unit_types_api: {
+        tpl: `/api/{0}/main/unittype/browse`,
+    },
+    /** спецухи данного типа предприятия и их характеристики [реалм, айди типа] */
+    virt_type_spec_api: {
+        tpl: `/api/{0}/main/unittype/produce?id={1}`,
+    },
+    /** список всех розничных продуктов с отделами [реалм]*/
+    virt_retail_products_api: {
+        tpl: `/api/{0}/main/product/goods`,
+    },
+    /** список всех городов реалма [реалм]*/
+    virt_cities_api: {
+        tpl: `/api/{0}/main/geo/city/browse`,
+    },
+    /** список всех регионов реалма [реалм]*/
+    virt_regions_api: {
+        tpl: `/api/{0}/main/geo/region/browse`,
+    },
+    /** список всех стран реалма [реалм]*/
+    virt_countries_api: {
+        tpl: `/api/{0}/main/geo/country/browse`,
+    },
+    /** список юнитов. [Реалм, АйдиКонторы] */
+    comp_unit_list: {
+        tpl: `/{0}/window/company/view/{1}/unit_list`,
+        rx: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,
+    },
+    /** удалить свой контракт в магазине, складе заводе и т.д [Реалм] */
+    unit_ajax_deleteContract: {
+        tpl: `/{0}/ajax/unit/supply/delete`,
+    },
+    /** создать новый контракт в магазине складе заводе итд [Реалм]*/
+    unit_ajax_createContract: {
+        tlp: `/{0}/ajax/unit/supply/create`,
+    },
+    /** пагинатор Аналитика - Продукция [реалм, pagesize]*/
+    pager_virt_product_suppliers: {
+        tlp: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/{1}`,
+    }
+};
 let Url_rx = {
     // для виртономики
     v_city_retail_report: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
@@ -768,15 +797,15 @@ let UrlApi_rx = {
     comp_unit_list: /api\/[a-z]+\/main\/company\/units$/i,
 };
 let Url_tpl = {
-    // компания в целом
-    comp_unit_list: `/{0}/window/company/view/{1}/unit_list`,
-    // юнит
-    ajax_deleteContract: `/{0}/ajax/unit/supply/delete`,
-    ajax_createContract: `/{0}/ajax/unit/supply/create`,
-    // глобальные виртовские
-    v_glob_suppliers: `/{0}/main/globalreport/marketing/by_products/{1}/`,
-    // пагинаторы
-    setPaging_marketingProd: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/20000`,
+//// компания в целом
+//comp_unit_list: `/{0}/window/company/view/{1}/unit_list`, // список юнитов. Реалм, АйдиКонторы
+//// юнит
+//ajax_deleteContract: `/{0}/ajax/unit/supply/delete`,       // удалить СВОЙ контракт в магазине, складе, заводе итд
+//ajax_createContract: `/{0}/ajax/unit/supply/create`,
+//// глобальные виртовские
+//v_glob_suppliers: `/{0}/main/globalreport/marketing/by_products/{1}/`,     // поставщики для товара. Глобально
+//// пагинаторы
+//setPaging_marketingProd: `/{0}/main/common/util/setpaging/reportcompany/marketingProduct/20000`, // Аналитика - Продукция  
 };
 let UrlApi_tpl = {
     // компания в целом main/company/units?id=3948072&pagesize=20000
@@ -947,6 +976,7 @@ function getOnlyText(item) {
         let el = $childrenNodes.get(i);
         if (el.nodeType === 3)
             res.push($(el).text()); // так как в разных браузерах текст запрашивается по разному, 
+        // универсальный способ запросить через jquery
     }
     return res;
 }
@@ -966,97 +996,24 @@ function oneOrError($item, selector) {
  * Отправляет запрос на установку нужной пагинации. Возвращает promice дальше делай с ним что надо.
  */
 function doRepage(pages, $html) {
+    if (1)
+        throw new Error("поправить надо функцию. криво работала");
     // если не задать данные страницы, то считаем что надо использовать текущую
-    if ($html == null)
-        $html = $(document);
-    // снизу всегда несколько кнопок для числа страниц, НО одна может быть уже нажата мы не знаем какая
-    // берем просто любую ненажатую, извлекаем ее текст, на у далее в ссылке всегда
-    // есть число такое же как текст в кнопке. Заменяем на свое и все ок.
-    let $pager = $html.find('ul.pager_options li').has("a").last();
-    let num = $pager.text().trim();
-    let pagerUrl = $pager.find('a').attr('href').replace(num, pages.toString());
-    // запросили обновление пагинации, дальше юзер решает что ему делать с этим
-    let deffered = $.Deferred();
-    $.get(pagerUrl)
-        .done((data, status, jqXHR) => deffered.resolve(data))
-        .fail((err) => deffered.reject("Не удалось установить пагинацию => " + err));
-    return deffered.promise();
-}
-/**
- * Загружается указанную страницу используя заданное число повторов и таймаут. Так же можно задать
- * нужно ли убирать пагинацию или нет. Если нужно, то функция вернет страничку БЕЗ пагинации
- * @param url
- * @param retries число попыток
- * @param timeout
- * @param repage нужно ли убирать пагинацию
- */
-function getPage(url, retries = 10, timeout = 1000, repage = true) {
-    let deffered = $.Deferred();
-    // сначала запросим саму страницу с перезапросом по ошибке
-    tryGet(url, retries, timeout)
-        .then((html) => {
-        let locdef = $.Deferred();
-        if (html == null) {
-            locdef.reject("неизвестная ошибка. страница пришла пустая " + url);
-            return locdef.promise();
-        }
-        // если страниц нет, то как бы не надо ничо репейджить
-        // если не надо репейджить то тоже не будем
-        let $html = $(html);
-        if (!repage || !hasPages($html)) {
-            deffered.resolve(html);
-        }
-        else {
-            // репейджим
-            let purl = getRepageUrl($html, 10000);
-            if (purl == null)
-                locdef.reject("не смог вытащить урл репейджа хотя он там должен быть");
-            else
-                locdef.resolve(purl);
-        }
-        return locdef.promise();
-    }) // если нет репейджа все закончится тут
-        .then((purl) => {
-        let locdef = $.Deferred();
-        tryGet(purl, retries, timeout)
-            .done(() => locdef.resolve())
-            .fail((err) => locdef.reject("ошибка репейджа => " + err));
-        return locdef.promise();
-    }) // запросим установку репейджа
-        .then(() => tryGet(url, retries, timeout)) // снова запросим страницу
-        .then((html) => deffered.resolve(html))
-        .fail((err) => deffered.reject(err));
-    return deffered.promise();
-}
-/**
- * Запрашивает страницу. При ошибке поробует повторить запрос через заданное число секунд.
- * Пробует заданное число попыток, после чего возвращает reject
- * @param url
- * @param retries число попыток загрузки
- * @param timeout таймаут между попытками
- */
-function tryGet(url, retries = 10, timeout = 1000) {
-    let $deffered = $.Deferred();
-    $deffered.notify("0: " + url); // сразу даем уведомление, это работает. НО только 1 сработает если вызвать ДО установки прогресс хендлера на промис
-    $.ajax({
-        url: url,
-        type: "GET",
-        success: (data, status, jqXHR) => $deffered.resolve(data),
-        error: function (jqXHR, textStatus, errorThrown) {
-            retries--;
-            if (retries <= 0) {
-                $deffered.reject("Не смог загрузить страницу " + this.url);
-                return;
-            }
-            logDebug(`ошибка запроса ${this.url} осталось ${retries} попыток`);
-            let _this = this;
-            setTimeout(() => {
-                $deffered.notify("0: " + url); // уведомляем об очередном запросе
-                $.ajax(_this);
-            }, timeout);
-        }
-    });
-    return $deffered.promise();
+    //if ($html == null)
+    //    $html = $(document);
+    //// снизу всегда несколько кнопок для числа страниц, НО одна может быть уже нажата мы не знаем какая
+    //// берем просто любую ненажатую, извлекаем ее текст, на у далее в ссылке всегда
+    //// есть число такое же как текст в кнопке. Заменяем на свое и все ок.
+    //let $pager = $html.find('ul.pager_options li').has("a").last();
+    //let num = $pager.text().trim();
+    //let pagerUrl = $pager.find('a').attr('href').replace(num, pages.toString());
+    //// запросили обновление пагинации, дальше юзер решает что ему делать с этим
+    //let deffered = $.Deferred();
+    //$.get(pagerUrl)
+    //    .done((data, status, jqXHR) => deffered.resolve(data))
+    //    .fail((err) => deffered.reject("Не удалось установить пагинацию => " + err));
+    // return deffered.promise();
+    return null;
 }
 /**
  * Запрашивает страницу. При ошибке поробует повторить запрос через заданное число секунд.
@@ -1083,6 +1040,7 @@ function tryGet_async(url, retries = 10, timeout = 1000, beforeGet, onError) {
         $.ajax({
             url: url,
             type: "GET",
+            xhrFields: { withCredentials: true },
             success: (data, status, jqXHR) => $deffered.resolve(data),
             error: function (jqXHR, textStatus, errorThrown) {
                 if (onError) {
@@ -1151,6 +1109,7 @@ function tryGetJSON_async(url, retries = 10, timeout = 1000, beforeGet, onError)
             type: "GET",
             cache: false,
             dataType: "text",
+            xhrFields: { withCredentials: true },
             success: (jsonStr, status, jqXHR) => {
                 let obj = parseJSON(jsonStr);
                 $deffered.resolve(obj);
@@ -1214,6 +1173,7 @@ function tryPost_async(url, form, retries = 10, timeout = 1000, beforePost, onEr
             url: url,
             data: form,
             type: "POST",
+            xhrFields: { withCredentials: true },
             success: (data, status, jqXHR) => $deferred.resolve(data),
             error: function (jqXHR, textStatus, errorThrown) {
                 if (onError) {
@@ -1275,6 +1235,7 @@ function tryPostJSON_async(url, data, retries = 10, timeout = 1000, beforePost, 
             data: data,
             type: "POST",
             dataType: 'JSON',
+            xhrFields: { withCredentials: true },
             success: (data, status, jqXHR) => $deferred.resolve(data),
             error: function (jqXHR, textStatus, errorThrown) {
                 if (onError) {
