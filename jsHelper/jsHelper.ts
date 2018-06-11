@@ -189,20 +189,20 @@ interface IDictionaryN<T> {
 }
 
 
-function dictKeysN(dict: IDictionaryN<any>): number[] {
-    return Object.keys(dict).map((v, i, arr) => parseInt(v));
+function keysN(dict: IDictionaryN<any>): number[] {
+    return Object.keys(dict).map(k => parseInt(k));
 }
-function dictKeys(dict: IDictionary<any>): string[] {
-    return Object.keys(dict);
+function keys<T extends object>(obj: T): string[] {
+    return Object.keys(obj);
 }
-function dictValues<T>(dict: IDictionary<T>): T[] {
+function valuesN<T>(dict: IDictionaryN<T>): T[] {
     let res: T[] = [];
     for (let key in dict)
         res.push(dict[key]);
 
     return res;
 }
-function dictValuesN<T>(dict: IDictionaryN<T>): T[] {
+function values<T>(dict: IDictionary<T>): T[] {
     let res: T[] = [];
     for (let key in dict)
         res.push(dict[key]);
@@ -211,12 +211,15 @@ function dictValuesN<T>(dict: IDictionaryN<T>): T[] {
 }
 
 /**
- * Проверяет наличие в словаре ключей. Шорт алиас для удобства.
+ * Проверяет любой объект на наличие свойств видимых. Удобен для словарей.
  * Если словарь не задать, вывалит исключение
- * @param dict проверяемый словарь
+ * @param obj
  */
-function isEmpty<T>(dict: IDictionary<T>): boolean {
-    return Object.keys(dict).length === 0;  // исключение на null
+function isEmpty<T extends object>(obj: T): boolean {
+    if (obj == null)
+        throw new Error("obj == null");
+
+    return Object.keys(obj).length === 0;
 }
 
 /**
