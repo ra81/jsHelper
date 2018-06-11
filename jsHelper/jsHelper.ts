@@ -789,12 +789,14 @@ function nullCheck<T>(val: T | null | undefined): T {
 
     return val;
 }
+/** проверяет чтобы value было стопудово числом а не другой хуйней */
 function numberCheck(value: any): number {
-    if (typeof (value) != "number")
+    if (isNaN(value) || value == Infinity ||  typeof (value) != "number")
         throw new Error(`${value} не является числом.`);
 
     return value;
 }
+/** проверяет чтобы value было стопудово строкой а не другой хуйней */
 function stringCheck(value: any): string {
     if (typeof (value) != "string")
         throw new Error(`${value} не является строкой.`);
