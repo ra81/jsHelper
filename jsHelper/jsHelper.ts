@@ -217,7 +217,7 @@ function values<T>(dict: IDictionary<T>): T[] {
  */
 function isEmpty<T extends object>(obj: T): boolean {
     if (obj == null)
-        throw new Error("obj == null");
+        throw new ArgumentNullError("obj");
 
     return Object.keys(obj).length === 0;
 }
@@ -811,7 +811,7 @@ function stringCheck(value: any): string {
  * Спать потоку заданное число миллисекунд. Асинхронная!!
  * @param ms
  */
-function sleep_async(ms: number) {
+async function sleep_async(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -859,13 +859,13 @@ interface IUrlTemplate {
 let commonUrls = {
     /** все поставщики товара в виртономике глобально [реалм, айди товара] */
     virt_product_suppliers: {
-        tpl:    `/{0}/main/globalreport/marketing/by_products/{1}/`,
-        rx:     /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i
+        tpl: `/{0}/main/globalreport/marketing/by_products/{1}/`,
+        rx: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i
     },
     /** розничный отчет по городу для товара [реалм,pid,countryID, regionID, cityID]*/
     virt_city_retail_report: {
-        tpl:    `/{0}/window/globalreport/marketing/by_trade_at_cities/{1}/{2}/{3}/{4}`,
-        rx:     /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
+        tpl: `/{0}/window/globalreport/marketing/by_trade_at_cities/{1}/{2}/{3}/{4}`,
+        rx: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_trade_at_cities\/\d+/i,
     },
     /** общий список всех типов предприятий в игре [реалм]*/
     virt_unit_types_api: {
@@ -894,9 +894,13 @@ let commonUrls = {
 
 
     /** список юнитов. [Реалм, АйдиКонторы] */
-    comp_unit_list: { 
-        tpl:    `/{0}/window/company/view/{1}/unit_list`, 
-        rx:     /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,  // Работает и для списка юнитов чужой компании
+    comp_unit_list: {
+        tpl: `/{0}/window/company/view/{1}/unit_list`,
+        rx: /\/[a-z]+\/(?:main|window)\/company\/view\/\d+(\/unit_list)?(\/xiooverview|\/overview)?$/i,  // Работает и для списка юнитов чужой компании
+    },
+    /** список юнитов. [Реалм, АйдиКонторы, Размер пагинации] */
+    comp_unit_list_api: {
+        tpl: `/api/{0}/main/company/units?id={1}&pagesize={2}`
     },
 
 
@@ -1214,6 +1218,16 @@ function oneOrError($item: JQuery, selector: string): JQuery {
         throw new Error(`Найдено ${$one.length} элементов вместо 1 для селектора ${selector}`);
 
     return $one;
+}
+
+/**
+ * Заданную строку превращает в объемт JQuery так, что браузер не будет запрашивать картинки и прочую хню.
+   Создает отдельный пустой документ и парсит в его контексте.
+ * @param html
+ */
+function parseHTML(html: string): JQuery {
+    let virtualDOM = document.implementation.createHTMLDocument('virtual');
+    return $(html, virtualDOM);
 }
 
 // AJAX ----------------------------------------
