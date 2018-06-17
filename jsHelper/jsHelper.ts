@@ -702,8 +702,9 @@ function extractDate(str: string): Date|null {
         return null;
 
     let y = parseInt(m[3]);
-
-    return new Date(y, mon, d);
+    let date = new Date(y, mon, d);
+    date.setFullYear(y);        // такой хитровыеб нужен так как 00 интерпретируется как 1900 год. А насильная установка норм катит
+    return date;
 }
 function extractDateOrError(str: string): Date {
     let dt = extractDate(str);

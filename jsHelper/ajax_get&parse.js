@@ -88,8 +88,12 @@ function tryGetGameDate_async(domain, realm) {
         let url = domain + formatStr(`/{0}/main/mediareport`, realm); // здеь дата точно есь
         let html = yield tryGet_async(url);
         let date = nullCheck(parseGameDate(html));
-        // TODO: проверочку бы сюда на корректность а то бывает херню выдает
-        //console.log(`дата: ` + date);
+        // проверка чтобы не дернуло случайно локальную дату как бывает у вирты нах
+        let localDate = new Date();
+        localDate.setFullYear(localDate.getFullYear() - 2000);
+        localDate.setHours(0, 0, 0, 0);
+        if (date.getTime() == localDate.getTime())
+            throw new Error(`игровое время ${date} равно локальному, косяк.`);
         return date;
     });
 }
