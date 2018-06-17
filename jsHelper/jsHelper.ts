@@ -381,22 +381,34 @@ function intersect<T>(a: T[], b: T[]): T[] {
     return unique(intersect);
 }
 
+/**
+ * Суммирует все элементы массива. Для пустого вернет 0.
+ * @param arr
+ */
+function sum(arr: number[]) {
+    return arr.reduce((acc, val) => acc + val, 0);
+}
+
 
 // NUMBER ------------------------------------------
 
 /**
  * round до заданного числа знаков. Может дать погрешность на округлении но похрен
- * @param n
- * @param decimals
+   Если подавать не числа а всяку хуйню то вывалит ошибки
+ * @param n конечное нормальное число.
+ * @param decimals число разрядов от 0 и больше. Если дробное то тупо берется целая часть
  */
 function roundTo(n: number, decimals: number) {
-    if (isNaN(n) || isNaN(decimals))
-        throw new Error(`числа должны быть заданы. n:${n}, decimals:${decimals}`);
+    if (!isFinite(n))
+        throw new ArgumentError("n", `должен быть числом а не ${n}`);
 
+    if (!isFinite(decimals))
+        throw new ArgumentError("decimals", `должен быть числом а не ${decimals}`);
+    
     if (decimals < 0)
-        throw new Error(`decimals: ${decimals} не может быть меньше 0`);
+        throw new ArgumentError("decimals", `не может быть меньше 0 (${decimals})`);
 
-    decimals = Math.round(decimals);    // делаем ставку на косяки округления откуда может прилететь 1.00000001
+    decimals = Math.trunc(decimals);
     let f = Math.pow(10, decimals);
     return Math.round(n * f) / f;
 }
@@ -444,11 +456,13 @@ function ceilTo(n: number, decimals: number) {
 interface IAction0 {
     (): void;
 }
-
 interface IAction1<T> {
     (arg: T): void;
 }
 
+interface IFunction0<Tout> {
+    (): Tout;
+}
 interface IFunction1<Tin, Tout> {
     (par1: Tin): Tout;
 }
@@ -628,6 +642,35 @@ function extractFile(fileUrl: string): [string, string] {
     return [symbol, ext];
 }
 
+/** единицы измерения временного интервала */
+enum TimeSpan { sec, min, hour, day }
+/**
+ * Разность между двумя датами в заданных единицах измерения времени
+ * @param left из чего вычитаем
+ * @param right что вычитаем
+ * @param span единица измерения
+ */
+function dateDiff(left: Date, right: Date, span: TimeSpan): number {
+    let diff = left.getTime() - right.getTime();    // разность в миллисекундах
+
+    switch (span) {
+        case TimeSpan.sec:
+            return diff / 1000;
+
+        case TimeSpan.min:
+            return diff / (1000 * 60);
+
+        case TimeSpan.hour:
+            return diff / (1000 * 60 * 60);
+
+        case TimeSpan.day:
+            return diff / (1000 * 60 * 60 * 24);
+
+        default:
+            throw new ArgumentError("span", `неизвестный тип временного интервала ${span}`);
+    }
+}
+
 /**
  * По текстовой строке возвращает номер месяца начиная с 0 для января. Либо null
  * @param str очищенная от пробелов и лишних символов строка
@@ -794,15 +837,15 @@ function nullCheck<T>(val: T | null | undefined): T {
 }
 /** проверяет чтобы value было стопудово числом а не другой хуйней */
 function numberCheck(value: any): number {
-    if (isNaN(value) || value == Infinity ||  typeof (value) != "number")
-        throw new Error(`${value} не является числом.`);
+    if (!isFinite(value))
+        throw new ArgumentError("value", `${value} не является числом.`);
 
     return value;
 }
 /** проверяет чтобы value было стопудово строкой а не другой хуйней */
 function stringCheck(value: any): string {
     if (typeof (value) != "string")
-        throw new Error(`${value} не является строкой.`);
+        throw new ArgumentError("value", `${value} не является строкой.`);
 
     return value;
 }
@@ -859,7 +902,7 @@ interface IUrlTemplate {
 let commonUrls = {
     /** все поставщики товара в виртономике глобально [реалм, айди товара] */
     virt_product_suppliers: {
-        tpl: `/{0}/main/globalreport/marketing/by_products/{1}/`,
+        tpl: `/{0}/window/globalreport/marketing/by_products/{1}/`,
         rx: /\/[a-z]+\/(?:main|window)\/globalreport\/marketing\/by_products\/\d+\/?$/i
     },
     /** розничный отчет по городу для товара [реалм,pid,countryID, regionID, cityID]*/
@@ -905,6 +948,14 @@ let commonUrls = {
 
 
 
+    /** торговый зал [реалм, айди юнита]*/
+    unit_tradehall: {
+        tpl: `/{0}/window/unit/view/{1}/trading_hall`
+    },
+    /** список поставщиков для юнита на товар [реалм, subid, id товара]*/
+    unit_supply_create: {
+        tpl: `/{0}/window/unit/supply/create/{1}/step1/{2}`
+    },
     /** удалить свой контракт в магазине, складе заводе и т.д [Реалм] */
     unit_ajax_deleteContract: {
         tpl:    `/{0}/ajax/unit/supply/delete`,

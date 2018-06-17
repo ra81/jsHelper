@@ -32,6 +32,8 @@
     <TypeScriptCompile Include="exceptions.ts" />
     <TypeScriptCompile Include="jsHelper.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="Scripts\typings\lz-string\lz-string.d.ts" />
+    <TypeScriptCompile Include="storage.ts" />
     <TypeScriptCompile Include="tests\0_test_core.ts" />
     <TypeScriptCompile Include="tests\1_assert.ts" />
     <TypeScriptCompile Include="tests\ajax.test..ts" />
