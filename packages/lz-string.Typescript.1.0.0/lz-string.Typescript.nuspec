@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>lz-string.Typescript</id>
+    <version>1.0.0</version>
+    <title>lz-string.Typescript</title>
+    <authors>pieroxy</authors>
+    <owners>Jeremy Danyow</owners>
+    <licenseUrl>https://github.com/pieroxy/lz-string/blob/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/pieroxy/lz-string/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>typescript definition file for lz-string</description>
+    <releaseNotes />
+    <copyright>Copyright 2014</copyright>
+    <tags>javascript string compression typescript</tags>
+  </metadata>
+</package>

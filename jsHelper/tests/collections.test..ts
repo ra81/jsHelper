@@ -17,8 +17,31 @@ appendModule("тест коллекций arr, dict", () => {
         Assert.isTrue(isEmpty(b));
 
         let c: any = null;
-        Assert.throwError(() => isEmpty(c), new ArgumentError(""));
+        Assert.throwError(() => isEmpty(c), new ArgumentNullError(""));
     });
 
+    it("dict2String dict has keys", () => {
+        let dict: IDictionaryN<string> = { [10]: "vasya", [20]: "petya" };
+        let res = dict2String(dict);
 
+        Assert.areEqual(res, "10:vasya, 20:petya");
+    });
+    it("dict2String isEmpty", () => {
+        let dict: IDictionaryN<string> = {};
+        let res = dict2String(dict);
+
+        Assert.areEqual(res, "");
+    });
+
+    it("sdfsdf", () => {
+
+        //let dic: IDictionary<string> = { ["as"]: "somevalue" };
+        //let d = df(dic, "as");
+
+        //function df<D extends (IDictionary<any> | IDictionaryN<any>)>(dic: D, key: string) {
+        //    let k: Extract<keyof D, string> = key;
+            
+        //    return dic[key];
+        //}
+    });
 });

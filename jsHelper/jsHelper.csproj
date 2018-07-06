@@ -27,15 +27,15 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="ajax_get&amp;parse.ts" />
-    <TypeScriptCompile Include="deepCompare.ts" />
-    <TypeScriptCompile Include="exceptions.ts" />
+    <TypeScriptCompile Include="1_collections.ts" />
+    <TypeScriptCompile Include="6_ajax_get_parse.ts" />
+    <TypeScriptCompile Include="2_deepCompare.ts" />
+    <TypeScriptCompile Include="0_exceptions.ts" />
     <TypeScriptCompile Include="jsHelper.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\lz-string\lz-string.d.ts" />
-    <TypeScriptCompile Include="storage.ts" />
-    <TypeScriptCompile Include="tests\0_test_core.ts" />
-    <TypeScriptCompile Include="tests\1_assert.ts" />
+    <TypeScriptCompile Include="3_storage.ts" />
+    <TypeScriptCompile Include="tests\0_header.ts" />
     <TypeScriptCompile Include="tests\ajax.test..ts" />
     <TypeScriptCompile Include="tests\collections.test..ts" />
   </ItemGroup>
@@ -77,15 +77,14 @@
   </ProjectExtensions>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
-    <TypeScriptSourceMap>False</TypeScriptSourceMap>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
     <TypeScriptTarget>ES6</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
     <TypeScriptModuleKind>
     </TypeScriptModuleKind>
-    <TypeScriptOutFile>
-    </TypeScriptOutFile>
+    <TypeScriptOutFile>out\jshelper.user.js</TypeScriptOutFile>
     <TypeScriptOutDir />
     <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
     <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
